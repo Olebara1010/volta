@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Start a project – Volta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Same tokens as the homepage, so every page matches */
+  :root {
+    --paper: #F2F3EF; --ink: #15181C; --slate: #5B6370; --rule: #D5D8D1;
+    --cobalt: #2438C9; --cobalt-ink: #FFFFFF; --spark: #F2B705; --slip: #FFFFFF;
+    --error: #B42318; --ok: #1E7A46;
+    --display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+    --body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  }
+  html[data-theme="dark"] {
+    --paper: #121417; --ink: #ECEDE8; --slate: #9AA1AC; --rule: #2A2E33;
+    --cobalt: #8794FF; --cobalt-ink: #121417; --spark: #FFC93C; --slip: #1B1E22;
+    --error: #FF8A80; --ok: #6FD39A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 2px solid var(--cobalt); outline-offset: 3px; border-radius: 4px; }
+
+  header.site { border-bottom: 1px solid var(--rule); background: var(--paper); position: sticky; top: 0; z-index: 10; }
+  .nav { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 72px; display: flex; align-items: center; gap: 1rem; }
+  .wordmark { display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.03em; text-decoration: none; color: var(--ink); }
+  .bolt { width: 1.55rem; height: 1.55rem; fill: var(--spark); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+  .back-link { color: var(--slate); text-decoration: none; font-size: 0.95rem; }
+  .back-link:hover { color: var(--ink); }
+  .theme-toggle { display: inline-grid; place-items: center; background: none; border: 1px solid var(--rule); color: var(--ink); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: clamp(3rem, 7vw, 5rem) clamp(16px, 4vw, 40px) 6rem; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.03em; max-width: 16ch; margin-bottom: 1rem; }
+  .lede { color: var(--slate); font-size: 1.075rem; max-width: 46ch; }
+
+  section.q-block { padding: 2.5rem 0; border-top: 1px solid var(--rule); }
+  form section.q-block:first-child { margin-top: 2.5rem; }
+  .q { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; margin-bottom: 0.3rem; }
+  .q-hint { color: var(--slate); font-size: 0.925rem; margin-bottom: 1.25rem; }
+
+  .row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .field-group { flex: 1; min-width: 220px; margin-bottom: 0.75rem; }
+  .field { width: 100%; background: var(--slip); border: 1px solid var(--rule); border-radius: 8px; padding: 0.85rem 1rem; color: var(--ink); font: 400 1rem/1.4 var(--body); }
+  .field:focus { outline: none; border-color: var(--cobalt); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 25%, transparent); }
+  .field::placeholder { color: var(--slate); opacity: 0.8; }
+  textarea.field { resize: vertical; min-height: 120px; }
+
+  .choice-group { display: grid; gap: 0.6rem; }
+  .choice { display: flex; align-items: flex-start; gap: 0.85rem; background: var(--slip); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem 1.1rem; cursor: pointer; transition: border-color 150ms, box-shadow 150ms; }
+  .choice:hover { border-color: var(--slate); }
+  .choice:has(input:checked) { border-color: var(--cobalt); box-shadow: inset 0 0 0 1px var(--cobalt); }
+  .choice input { margin-top: 0.25rem; accent-color: var(--cobalt); width: 16px; height: 16px; flex-shrink: 0; }
+  .choice-label { font-weight: 600; }
+  .choice-desc { color: var(--slate); font-size: 0.875rem; margin-top: 0.1rem; }
+
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .check { display: flex; align-items: center; gap: 0.65rem; background: var(--slip); border: 1px solid var(--rule); border-radius: 10px; padding: 0.8rem 1rem; cursor: pointer; transition: border-color 150ms, box-shadow 150ms; }
+  .check:hover { border-color: var(--slate); }
+  .check:has(input:checked) { border-color: var(--cobalt); box-shadow: inset 0 0 0 1px var(--cobalt); }
+  .check input { accent-color: var(--cobalt); width: 16px; height: 16px; }
+
+  .rush-flag { display: none; margin-top: 1rem; font-size: 0.9rem; border-left: 3px solid var(--spark); padding: 0.4rem 0 0.4rem 0.8rem; }
+  .rush-flag.visible { display: block; }
+
+  .btn-primary { display: block; width: 100%; background: var(--cobalt); color: var(--cobalt-ink); padding: 1rem 1.4rem; border-radius: 8px; font: 600 1.05rem/1 var(--body); border: 0; cursor: pointer; margin-top: 1.25rem; transition: transform 150ms, filter 150ms; }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-2px); }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+  .form-status { font-size: 0.925rem; margin-top: 1rem; display: none; }
+  .form-status.success { color: var(--ok); display: block; }
+  .form-status.error { color: var(--error); display: block; }
+
+  @media (max-width: 640px) { .checks { grid-template-columns: 1fr; } .back-link { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .btn-primary:hover { transform: none; } }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="/" aria-label="Volta Energy home"><svg class="bolt" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg><span>Volta</span></a>
+    <div class="nav-right">
+      <a href="/" class="back-link">Back to home</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Switch light or dark mode"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+    </div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <h1>Tell us what you're building.</h1>
+  <p class="lede">The more detail you give us here, the more accurate your quote will be. It takes about three minutes, and your itemised quote appears straight after.</p>
+
+  <form id="request-form">
+
+    <section class="q-block">
+      <p class="q">Who are we talking to?</p>
+      <div class="row">
+        <div class="field-group">
+          <input class="field" type="text" id="clientName" name="clientName" placeholder="Your name" required />
+        </div>
+        <div class="field-group">
+          <input class="field" type="email" id="clientEmail" name="clientEmail" placeholder="Email address" required />
+        </div>
+      </div>
+      <div class="field-group">
+        <input class="field" type="tel" id="clientPhone" name="clientPhone" placeholder="Phone (optional)" />
+      </div>
+    </section>
+
+    <section class="q-block">
+      <p class="q">What kind of project is this?</p>
+      <p class="q-hint">Pick the closest match. Booking sites and portfolios fit under Simple website or Web app.</p>
+      <div class="choice-group">
+        <label class="choice">
+          <input type="radio" name="projectType" value="simple_website" required />
+          <span><span class="choice-label">Simple website</span><div class="choice-desc">A few pages, informational, no complex logic.</div></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="projectType" value="ecommerce" />
+          <span><span class="choice-label">E-commerce</span><div class="choice-desc">Product listings, cart, checkout.</div></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="projectType" value="web_app" />
+          <span><span class="choice-label">Web app</span><div class="choice-desc">Accounts, dashboards, custom functionality.</div></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="projectType" value="mobile_app" />
+          <span><span class="choice-label">Mobile app</span><div class="choice-desc">iOS, Android, or both.</div></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="projectType" value="not_sure" />
+          <span><span class="choice-label">Not sure yet</span><div class="choice-desc">Describe it below and we'll work it out.</div></span>
+        </label>
+      </div>
+    </section>
+
+    <section class="q-block">
+      <p class="q">Describe your project</p>
+      <p class="q-hint">What are you building, and who's it for?</p>
+      <div class="field-group">
+        <input class="field" type="text" id="projectTitle" name="projectTitle" placeholder="Project name, e.g. Riverside Cafe website" required />
+      </div>
+      <div class="field-group">
+        <textarea class="field" id="description" name="description" placeholder="e.g. A booking site for my cafe where customers can reserve tables and see the menu..." required></textarea>
+      </div>
+    </section>
+
+    <section class="q-block">
+      <p class="q">Which features do you need?</p>
+      <p class="q-hint">Tick anything that applies. Each feature appears as its own line in your quote.</p>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="userAccounts" /> User accounts / login</label>
+        <label class="check"><input type="checkbox" name="payments" /> Payments</label>
+        <label class="check"><input type="checkbox" name="adminPanel" /> Admin panel</label>
+        <label class="check"><input type="checkbox" name="thirdPartyIntegrations" /> Third-party integrations</label>
+        <label class="check"><input type="checkbox" name="fileUploads" /> File uploads</label>
+        <label class="check"><input type="checkbox" name="search" /> Search</label>
+        <label class="check"><input type="checkbox" name="multiLanguage" /> Multiple languages</label>
+      </div>
+      <div class="field-group" style="margin-top: 1.25rem;">
+        <input class="field" type="text" id="featuresOther" name="featuresOther" placeholder="Anything else specific? e.g. live chat, booking calendar" />
+      </div>
+    </section>
+
+    <section class="q-block">
+      <p class="q">Any design direction?</p>
+      <p class="q-hint">Optional. Links to sites you like, a logo, brand colours, anything.</p>
+      <div class="field-group">
+        <textarea class="field" id="designReferences" name="designReferences" placeholder="Links or notes..."></textarea>
+      </div>
+    </section>
+
+    <section class="q-block">
+      <p class="q">When do you need this?</p>
+      <div class="choice-group" id="timeline">
+        <label class="choice">
+          <input type="radio" name="timeline" value="no_rush" required />
+          <span><span class="choice-label">No rush</span><div class="choice-desc">Flexible timeline.</div></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="timeline" value="two_to_four_weeks" />
+          <span><span class="choice-label">2–4 weeks</span></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="timeline" value="rush" />
+          <span><span class="choice-label">As soon as possible</span><div class="choice-desc">Rush jobs carry a priority fee.</div></span>
+        </label>
+      </div>
+      <p class="rush-flag" id="rushFlag">Rush pricing (+40%) will apply to your quote.</p>
+    </section>
+
+    <section class="q-block">
+      <p class="q">Anything else we should know?</p>
+      <div class="field-group">
+        <textarea class="field" id="additionalNotes" name="additionalNotes" placeholder="Optional"></textarea>
+      </div>
+      <button type="submit" class="btn-primary" id="submitBtn">Get my quote</button>
+      <div class="form-status" id="status"></div>
+    </section>
+
+  </form>
+</div>
+
+<script>
+  const API = ''; // empty = same origin, matches your index.html config
+
+  const form = document.getElementById('request-form');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusEl = document.getElementById('status');
+  const rushFlag = document.getElementById('rushFlag');
+
+  document.getElementById('timeline').addEventListener('change', (e) => {
+    rushFlag.classList.toggle('visible', e.target.value === 'rush');
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    statusEl.className = 'form-status';
+
+    const fd = new FormData(form);
+    const payload = {
+      clientName: fd.get('clientName'),
+      clientEmail: fd.get('clientEmail'),
+      clientPhone: fd.get('clientPhone') || undefined,
+      projectTitle: fd.get('projectTitle'),
+      projectType: fd.get('projectType'),
+      description: fd.get('description'),
+      features: {
+        userAccounts: fd.get('userAccounts') === 'on',
+        payments: fd.get('payments') === 'on',
+        adminPanel: fd.get('adminPanel') === 'on',
+        thirdPartyIntegrations: fd.get('thirdPartyIntegrations') === 'on',
+        fileUploads: fd.get('fileUploads') === 'on',
+        search: fd.get('search') === 'on',
+        multiLanguage: fd.get('multiLanguage') === 'on',
+        other: fd.get('featuresOther') || undefined,
+      },
+      designReferences: fd.get('designReferences') || undefined,
+      timeline: fd.get('timeline'),
+      additionalNotes: fd.get('additionalNotes') || undefined,
+    };
+
+    let redirecting = false;
+    try {
+      const res = await fetch(`${API}/api/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+      form.reset();
+      rushFlag.classList.remove('visible');
+      submitBtn.textContent = 'Taking you to your quote...';
+      redirecting = true;
+      window.location.href = `/quote.html?id=${data.requestId}`;
+    } catch (err) {
+      statusEl.textContent = err.message || 'Could not submit — please try again.';
+      statusEl.className = 'form-status error';
+    } finally {
+      if (!redirecting) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Get my quote';
+      }
+    }
+  });
+
+  // ── Theme (same setting as the homepage) ─────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('volta_theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('volta_theme'); } catch (e) {}
+  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+</script>
+</body>
+</html>

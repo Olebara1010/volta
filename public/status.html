@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project status — VOLTA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0A0A0F; --cream: #F7F4EE; --volt: #C6FF00;
+    --coral: #FF4D5A; --cobalt: #2B3FFF; --purple: #9B5DE5; --mid: #5A5A72;
+    --text-rgb: 247,244,238; --bg-rgb: 10,10,15;
+    --surface: var(--ink); --on-surface: var(--cream); --surface-raised: #12121A;
+    --accent-text: var(--volt);
+  }
+  html[data-theme="light"] {
+    --text-rgb: 10,10,15; --bg-rgb: 239,233,220;
+    --surface: #EFE9DC; --on-surface: var(--ink); --surface-raised: #F7F3E9;
+    --accent-text: #5E7A00;
+  }
+  html[data-theme="light"] .bg-blob { mix-blend-mode: multiply; filter: blur(70px) opacity(0.5); }
+  html[data-theme="light"] .grain { opacity: 0.035; }
+  body { font-family: 'Space Grotesk', sans-serif; background: var(--surface); color: var(--on-surface); transition: background 0.4s, color 0.4s; }
+
+  /* ── AMBIENT BACKGROUND ── */
+  .bg-layer { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+  .bg-float { position: absolute; will-change: transform; }
+  .bg-blob { width: 100%; height: 100%; border-radius: 50%; filter: blur(70px); transform: translate(var(--px, 0), var(--py, 0)); transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .float-1 { width: 48vw; height: 48vw; top: -12%; right: -8%; animation: drift1 24s ease-in-out infinite; }
+  .float-1 .bg-blob { background: radial-gradient(circle, rgba(43,63,255,0.5), transparent 70%); }
+  .float-2 { width: 40vw; height: 40vw; bottom: -14%; left: -10%; animation: drift2 28s ease-in-out infinite; }
+  .float-2 .bg-blob { background: radial-gradient(circle, rgba(155,93,229,0.4), transparent 70%); }
+  .float-3 { width: 28vw; height: 28vw; top: 40%; left: 45%; animation: drift3 32s ease-in-out infinite; }
+  .float-3 .bg-blob { background: radial-gradient(circle, rgba(198,255,0,0.14), transparent 70%); }
+  @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6vw, 8vw) scale(1.15); } }
+  @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8vw, -6vw) scale(1.12); } }
+  @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(5vw,-5vw) scale(1.2); } 66% { transform: translate(-5vw,5vw) scale(0.88); } }
+
+  .grain { position: fixed; inset: 0; z-index: -1; opacity: 0.05; pointer-events: none; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+
+  .volt-trace { position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; overflow: hidden; }
+  .volt-trace::after { content: ''; position: absolute; top: 0; left: -25%; width: 25%; height: 100%; background: linear-gradient(90deg, transparent, var(--volt), transparent); animation: sweep 5s linear infinite; }
+  @keyframes sweep { from { left: -25%; } to { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .bg-float, .volt-trace::after { animation: none; } }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 5vw; backdrop-filter: blur(16px);
+    background: rgba(var(--bg-rgb),0.72); border-bottom: 1px solid rgba(var(--text-rgb),0.06);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent-text); text-decoration: none; }
+  .back-link { color: var(--on-surface); text-decoration: none; font-size: 0.875rem; font-weight: 500; opacity: 0.75; display: flex; align-items: center; gap: 0.4rem; }
+  .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--text-rgb),0.08); border: 1px solid rgba(var(--text-rgb),0.12);
+    cursor: pointer; font-size: 0.95rem; transition: background 0.2s, transform 0.3s;
+  }
+  .theme-toggle:hover { background: rgba(var(--text-rgb),0.14); transform: rotate(-12deg); }
+  .back-link:hover { opacity: 1; }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 10rem 5vw 6rem; }
+  .eyebrow { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-text); margin-bottom: 1.25rem; }
+  h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  .lede { color: rgba(var(--text-rgb),0.55); font-size: 1rem; margin-bottom: 2.5rem; }
+
+  /* ── LOOKUP FORM ── */
+  .field {
+    width: 100%; background: rgba(var(--text-rgb),0.07); border: 1px solid rgba(var(--text-rgb),0.12);
+    border-radius: 0.75rem; padding: 0.85rem 1.1rem; color: var(--on-surface);
+    font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+  }
+  .field:focus { border-color: var(--volt); }
+  .lookup-row { display: flex; gap: 0.75rem; }
+  .lookup-row .field { flex: 1; }
+  .btn-primary {
+    background: var(--coral); color: #fff; padding: 0.85rem 1.6rem; border-radius: 100px;
+    font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; white-space: nowrap;
+    font-family: inherit; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,77,90,0.4); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── RESULTS LIST ── */
+  .result-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .result-card {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: 1.1rem 1.3rem; border-radius: 0.9rem; border: 1px solid rgba(var(--text-rgb),0.1);
+    background: rgba(var(--text-rgb),0.03); text-decoration: none; color: var(--on-surface);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .result-card:hover { border-color: var(--volt); background: rgba(var(--text-rgb),0.06); }
+  .result-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .result-date { font-size: 0.8rem; color: rgba(var(--text-rgb),0.45); }
+
+  .status-pill {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 0.35rem 0.8rem; border-radius: 100px; white-space: nowrap;
+  }
+  .pill-new { background: rgba(var(--text-rgb),0.1); color: rgba(var(--text-rgb),0.6); }
+  .pill-quoted { background: rgba(43,63,255,0.12); color: var(--cobalt); }
+  .pill-accepted { background: rgba(198,255,0,0.12); color: var(--accent-text); }
+  .pill-in_progress { background: rgba(155,93,229,0.14); color: var(--purple); }
+  .pill-delivered { background: rgba(198,255,0,0.18); color: var(--accent-text); }
+  .pill-rejected { background: rgba(255,77,90,0.12); color: var(--coral); }
+
+  /* ── TRACKER ── */
+  .tracker-card { border-radius: 1.5rem; border: 1px solid rgba(var(--text-rgb),0.1); background: rgba(var(--text-rgb),0.03); padding: 2rem; }
+  .tracker-project { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.35rem; }
+  .tracker-type { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(var(--text-rgb),0.45); margin-bottom: 2rem; }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 1rem; position: relative; }
+  .step-marker { display: flex; flex-direction: column; align-items: center; }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0; border: 2px solid rgba(var(--text-rgb),0.18);
+    background: var(--surface); color: rgba(var(--text-rgb),0.35); transition: all 0.3s;
+  }
+  .step-line { width: 2px; flex: 1; background: rgba(var(--text-rgb),0.15); min-height: 28px; }
+  .step.done .step-dot { background: var(--volt); border-color: var(--volt); color: var(--ink); }
+  .step.done .step-line { background: var(--volt); }
+  .step.current .step-dot { background: var(--surface); border-color: var(--volt); color: var(--accent-text); box-shadow: 0 0 0 4px rgba(198,255,0,0.15); }
+  .step-body { padding-bottom: 2rem; flex: 1; }
+  .step:last-child .step-body { padding-bottom: 0; }
+  .step-label { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .step-desc { font-size: 0.85rem; color: rgba(var(--text-rgb),0.5); }
+  .step:not(.done):not(.current) .step-label { color: rgba(var(--text-rgb),0.4); }
+
+  .rejected-banner {
+    padding: 1.5rem; border-radius: 1rem; background: rgba(255,77,90,0.08); border: 1px solid rgba(255,77,90,0.3);
+    color: var(--coral); font-size: 0.95rem;
+  }
+
+  .downloads-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed rgba(var(--text-rgb),0.15); }
+  .downloads-heading { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 1rem; color: var(--accent-text); }
+  .file-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: 0.9rem 1.1rem; border-radius: 0.75rem; border: 1px solid rgba(var(--text-rgb),0.1);
+    background: rgba(var(--text-rgb),0.03); margin-bottom: 0.6rem;
+  }
+  .file-name { font-size: 0.9rem; font-weight: 500; }
+  .file-size { font-size: 0.78rem; color: rgba(var(--text-rgb),0.45); margin-top: 0.1rem; }
+  .btn-download {
+    background: var(--volt); color: var(--ink); padding: 0.5rem 1.1rem; border-radius: 100px;
+    font-size: 0.82rem; font-weight: 700; text-decoration: none; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .balance-box {
+    padding: 1.5rem; border-radius: 1rem; background: rgba(198,255,0,0.08); border: 1px solid rgba(198,255,0,0.25);
+  }
+  .balance-box .balance-amount { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; margin: 0.4rem 0 1rem; }
+  .btn-primary-sm {
+    background: var(--coral); color: #fff; padding: 0.8rem 1.6rem; border-radius: 100px;
+    font-size: 0.9rem; font-weight: 700; border: none; cursor: pointer; font-family: inherit;
+  }
+  .btn-primary-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .switch-link { display: inline-block; margin-top: 1.5rem; font-size: 0.85rem; color: rgba(var(--text-rgb),0.5); text-decoration: underline; cursor: pointer; }
+
+  .status-msg { margin-top: 1rem; font-size: 0.9rem; color: var(--coral); display: none; }
+  .status-msg.visible { display: block; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <div class="bg-float float-1"><div class="bg-blob" data-depth="1"></div></div>
+  <div class="bg-float float-2"><div class="bg-blob" data-depth="1.6"></div></div>
+  <div class="bg-float float-3"><div class="bg-blob" data-depth="0.6"></div></div>
+</div>
+<div class="grain"></div>
+
+<nav>
+  <div class="volt-trace"></div>
+  <a href="/" class="logo">VOLTA</a>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">🌙</button>
+    <a href="/" class="back-link">← Back to site</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="eyebrow">✦ Project status</div>
+  <h1 id="pageTitle">Track your project</h1>
+  <p class="lede" id="pageLede">Enter your project ID or the email you submitted your request with.</p>
+
+  <!-- Email lookup form -->
+  <div id="lookupState">
+    <div class="lookup-row">
+      <input class="field" type="text" id="lookupEmail" placeholder="Project ID or email address" />
+      <button class="btn-primary" id="lookupBtn" onclick="lookupByEmail()">Find my project</button>
+    </div>
+    <p class="status-msg" id="lookupStatus"></p>
+    <div class="result-list hidden" id="resultList"></div>
+  </div>
+
+  <!-- Single project tracker -->
+  <div class="hidden" id="trackerState">
+    <div class="tracker-card">
+      <div class="tracker-project" id="trackerTitle"></div>
+      <div class="tracker-type" id="trackerType"></div>
+      <div class="project-id-line" id="projectIdLine" style="margin-top:0.4rem; font-size:0.8rem; opacity:0.6;"></div>
+      <div class="balance-box hidden" id="depositBox" style="margin:1rem 0 1.25rem;"></div>
+
+      <div class="rejected-banner hidden" id="paymentSuccessBanner" style="background: rgba(198,255,0,0.12); border-color: rgba(198,255,0,0.3); color: var(--accent-text);"></div>
+      <div id="stepsContainer"></div>
+      <div class="deposit-line hidden" id="depositLine" style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;"></div>
+      <div class="rejected-banner hidden" id="rejectedBanner"></div>
+      <div class="downloads-section hidden" id="downloadsSection">
+        <div class="downloads-heading">✦ Your files are ready</div>
+        <div id="fileList"></div>
+      </div>
+    </div>
+    <span class="switch-link" onclick="showLookup()">← Look up a different project</span>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  const params = new URLSearchParams(window.location.search);
+  const requestId = params.get('id');
+
+  const lookupState = document.getElementById('lookupState');
+  const trackerState = document.getElementById('trackerState');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageLede = document.getElementById('pageLede');
+
+  const STEP_ORDER = ['new', 'quoted', 'accepted', 'in_progress', 'delivered'];
+  const STEP_LABELS = {
+    new: { label: 'Request received', desc: "We've got your brief." },
+    quoted: { label: 'Quote sent', desc: 'Your itemised quote is ready to review.' },
+    accepted: { label: 'Quote accepted', desc: "You're in — next up is the deposit." },
+    in_progress: { label: 'In progress', desc: "We're building your project." },
+    delivered: { label: 'Delivered', desc: 'Your finished project is ready to download.' },
+  };
+  const TYPE_LABELS = {
+    simple_website: 'Simple website', ecommerce: 'E-commerce',
+    mobile_app: 'Mobile app', web_app: 'Web app', not_sure: 'Project',
+  };
+
+  function showLookup() {
+    trackerState.classList.add('hidden');
+    lookupState.classList.remove('hidden');
+    pageTitle.textContent = 'Track your project';
+    pageLede.textContent = 'Enter your project ID or the email you submitted your request with.';
+    history.replaceState(null, '', 'status.html');
+  }
+
+  function renderTracker(request) {
+    lookupState.classList.add('hidden');
+    trackerState.classList.remove('hidden');
+    pageTitle.textContent = 'Here\'s where things stand';
+    pageLede.textContent = `For ${request.projectTitle}.`;
+
+    document.getElementById('trackerTitle').textContent = request.projectTitle;
+    document.getElementById('trackerType').textContent = TYPE_LABELS[request.projectType] || request.projectType;
+    document.getElementById('projectIdLine').textContent = `Project ID: ${request._id} — keep this to track your project.`;
+    renderDepositBox(request);
+
+    const stepsContainer = document.getElementById('stepsContainer');
+    const rejectedBanner = document.getElementById('rejectedBanner');
+
+    if (request.status === 'rejected') {
+      stepsContainer.classList.add('hidden');
+      rejectedBanner.classList.remove('hidden');
+      rejectedBanner.textContent = "This quote was declined. If anything's changed, just get back in touch and we'll put together a new one.";
+      return;
+    }
+
+    stepsContainer.classList.remove('hidden');
+    rejectedBanner.classList.add('hidden');
+
+    const currentIndex = STEP_ORDER.indexOf(request.status);
+    stepsContainer.innerHTML = STEP_ORDER.map((step, i) => {
+      const info = STEP_LABELS[step];
+      let cls = 'step';
+      if (i < currentIndex) cls += ' done';
+      else if (i === currentIndex) cls += ' current';
+      const isLast = i === STEP_ORDER.length - 1;
+      return `
+        <div class="${cls}">
+          <div class="step-marker">
+            <div class="step-dot">${i < currentIndex ? '✓' : i + 1}</div>
+            ${!isLast ? '<div class="step-line"></div>' : ''}
+          </div>
+          <div class="step-body">
+            <div class="step-label">${info.label}</div>
+            <div class="step-desc">${info.desc}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const downloadsSection = document.getElementById('downloadsSection');
+    const fileList = document.getElementById('fileList');
+    if (request.status === 'delivered' && request.deliveredFiles && request.deliveredFiles.length) {
+      downloadsSection.classList.remove('hidden');
+
+      if (!request.fullPaymentPaid) {
+        const balance = Math.max(0, Math.round((request.quotedPrice || 0) - (request.depositAmount || 0)));
+        fileList.innerHTML = `
+          <div class="balance-box">
+            <div>Your project is finished! Pay the remaining balance to unlock your downloads.</div>
+            <div class="balance-amount">£${balance.toLocaleString('en-GB')}</div>
+            <button class="btn-primary-sm" id="payBalanceBtn" onclick="payBalance()">Pay remaining balance →</button>
+            <div id="balanceError" style="margin-top:0.75rem; color: var(--coral); font-size:0.85rem;"></div>
+          </div>
+        `;
+      } else {
+        fileList.innerHTML = request.deliveredFiles.map(f => `
+          <div class="file-row">
+            <div>
+              <div class="file-name">${f.originalName}</div>
+              <div class="file-size">${formatFileSize(f.size)}</div>
+            </div>
+            <a class="btn-download" href="${API}/api/requests/${requestId}/files/${f.filename}">Download</a>
+          </div>
+        `).join('');
+      }
+    } else {
+      downloadsSection.classList.add('hidden');
+    }
+
+    const depositLine = document.getElementById('depositLine');
+    if (request.depositPaid) {
+      depositLine.classList.remove('hidden');
+      depositLine.textContent = `✓ Deposit of £${Number(request.depositAmount).toLocaleString('en-GB')} paid${request.paidAt ? ' on ' + new Date(request.paidAt).toLocaleDateString('en-GB') : ''}.`;
+    } else {
+      depositLine.classList.add('hidden');
+    }
+  }
+
+  // Shows what the client needs to do about money right now, with a button to pay —
+  // so they're never stuck waiting on an email to get a payment link.
+  function renderDepositBox(request) {
+    const box = document.getElementById('depositBox');
+    const payUrl = `${API}/api/requests/${request._id}/pay`;
+    const money = n => `£${Number(n).toLocaleString('en-GB')}`;
+    let html = '';
+    if (request.status === 'rejected' || request.depositPaid) {
+      html = '';
+    } else if (request.negotiationStatus === 'pending') {
+      html = `<div>We've received your budget of <strong>${money(request.clientBudget)}</strong> and we're reviewing it. We'll email you shortly.</div>`;
+    } else if (request.negotiationStatus === 'countered') {
+      html = `<div>Our best price for this project is:</div>
+        <div class="balance-amount">${money(request.counterPrice)}</div>
+        <a class="btn-primary-sm" style="display:inline-block; text-decoration:none;" href="${payUrl}">Accept &amp; pay deposit →</a>
+        <div style="margin-top:0.75rem; font-size:0.85rem;"><a href="quote.html?id=${request._id}" style="color:inherit;">View or decline this offer</a></div>`;
+    } else if (request.status === 'accepted' && request.quotedPrice) {
+      html = `<div>Your price is agreed. Pay your deposit to get the project started.</div>
+        <div class="balance-amount">${money(request.quotedPrice)}</div>
+        <a class="btn-primary-sm" style="display:inline-block; text-decoration:none;" href="${payUrl}">Pay deposit →</a>`;
+    } else if (request.status === 'quoted') {
+      html = `<div>Your quote is ready.</div>
+        <a class="btn-primary-sm" style="display:inline-block; text-decoration:none; margin-top:0.75rem;" href="quote.html?id=${request._id}">View your quote →</a>`;
+    }
+    box.innerHTML = html;
+    box.classList.toggle('hidden', !html);
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(1)} MB`;
+    return `${Math.round(bytes / 1024)} KB`;
+  }
+
+  async function payBalance() {
+    const btn = document.getElementById('payBalanceBtn');
+    const errorEl = document.getElementById('balanceError');
+    if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to payment...'; }
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}/create-balance-checkout-session`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not start payment');
+      window.location.href = data.url; // off to Stripe Checkout
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Pay remaining balance →'; }
+      if (errorEl) errorEl.textContent = err.message;
+    }
+  }
+
+  async function loadById(id) {
+    pageTitle.textContent = 'Loading...';
+    try {
+      const res = await fetch(`${API}/api/requests/${id}`);
+      const request = await res.json();
+      if (!res.ok) throw new Error(request.error || 'Project not found');
+      renderTracker(request);
+      const paymentBanner = document.getElementById('paymentSuccessBanner');
+      if (params.get('payment') === 'success') {
+        paymentBanner.classList.remove('hidden');
+        paymentBanner.textContent = '✓ Payment received — thank you!';
+      } else if (params.get('payment') === 'cancelled') {
+        paymentBanner.classList.remove('hidden');
+        paymentBanner.style.background = 'rgba(255,77,90,0.08)';
+        paymentBanner.style.borderColor = 'rgba(255,77,90,0.3)';
+        paymentBanner.style.color = 'var(--coral)';
+        paymentBanner.textContent = 'Payment was cancelled — you can try again whenever you\'re ready.';
+      } else {
+        paymentBanner.classList.add('hidden');
+      }
+    } catch (err) {
+      showLookup();
+      const statusEl = document.getElementById('lookupStatus');
+      statusEl.textContent = err.message || 'Could not find that project.';
+      statusEl.classList.add('visible');
+    }
+  }
+
+  async function lookupByEmail() {
+    const email = document.getElementById('lookupEmail').value.trim();
+    const statusEl = document.getElementById('lookupStatus');
+    const resultList = document.getElementById('resultList');
+    const btn = document.getElementById('lookupBtn');
+    statusEl.classList.remove('visible');
+    resultList.classList.add('hidden');
+
+    if (!email) {
+      statusEl.textContent = 'Please enter your project ID or email.';
+      statusEl.classList.add('visible');
+      return;
+    }
+    // A 24-character project ID opens that project straight away.
+    if (/^[a-f0-9]{24}$/i.test(email)) {
+      window.location.href = `status.html?id=${email}`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+    try {
+      const res = await fetch(`${API}/api/requests/lookup?email=${encodeURIComponent(email)}`);
+      const requests = await res.json();
+      if (!res.ok) throw new Error(requests.error || 'Something went wrong');
+
+      if (!requests.length) {
+        statusEl.textContent = "No projects found for that email. Double-check it's the one you submitted with.";
+        statusEl.classList.add('visible');
+        return;
+      }
+
+      resultList.innerHTML = requests.map(r => `
+        <a class="result-card" href="status.html?id=${r._id}">
+          <div>
+            <div class="result-title">${r.projectTitle}</div>
+            <div class="result-date">${new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+          </div>
+          <span class="status-pill pill-${r.status}">${r.status.replace('_', ' ')}</span>
+        </a>
+      `).join('');
+      resultList.classList.remove('hidden');
+    } catch (err) {
+      statusEl.textContent = err.message || 'Something went wrong — please try again.';
+      statusEl.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find my project';
+    }
+  }
+
+  document.getElementById('lookupEmail').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') lookupByEmail();
+  });
+
+  // ── Theme ──────────────────────────────────────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('volta_theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    applyTheme(current === 'light' ? 'dark' : 'light');
+  }
+  applyTheme(localStorage.getItem('volta_theme') || 'dark');
+
+  // ── Ambient background parallax ─────────────────────────────
+  const bgBlobs = document.querySelectorAll('.bg-blob');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reducedMotion && bgBlobs.length) {
+    window.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5);
+      bgBlobs.forEach(b => {
+        const depth = parseFloat(b.dataset.depth || 1);
+        b.style.setProperty('--px', `${x * depth * 30}px`);
+        b.style.setProperty('--py', `${y * depth * 30}px`);
+      });
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  if (requestId) {
+    lookupState.classList.add('hidden');
+    loadById(requestId);
+  } else if (params.get('email')) {
+    // Came from the "Track your project" box on the homepage
+    document.getElementById('lookupEmail').value = params.get('email');
+    lookupByEmail();
+  }
+</script>
+</body>
+</html>

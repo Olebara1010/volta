@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": 1782569416407,
+      "name": "Deira",
+      "email": "deira@gmail.com",
+      "password": "$2a$12$yJLq/7zYLibxko2nvWmqXeiBiWoxdQKcTu0n51/V5cjdlAfxWbGg2",
+      "role": "user",
+      "created_at": "2026-06-27T14:10:16.407Z"
+    }
+  ],
+  "contacts": [],
+  "subscribers": []
+}

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your quote — VOLTA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0A0A0F; --cream: #F7F4EE; --volt: #C6FF00;
+    --coral: #FF4D5A; --cobalt: #2B3FFF; --purple: #9B5DE5; --mid: #5A5A72;
+    --text-rgb: 247,244,238; --bg-rgb: 10,10,15;
+    --surface: var(--ink); --on-surface: var(--cream); --surface-raised: #12121A;
+    --accent-text: var(--volt);
+  }
+  html[data-theme="light"] {
+    --text-rgb: 10,10,15; --bg-rgb: 239,233,220;
+    --surface: #EFE9DC; --on-surface: var(--ink); --surface-raised: #F7F3E9;
+    --accent-text: #5E7A00;
+  }
+  html[data-theme="light"] .bg-blob { mix-blend-mode: multiply; filter: blur(70px) opacity(0.5); }
+  html[data-theme="light"] .grain { opacity: 0.035; }
+  body { font-family: 'Space Grotesk', sans-serif; background: var(--surface); color: var(--on-surface); transition: background 0.4s, color 0.4s; }
+
+  /* ── AMBIENT BACKGROUND ── */
+  .bg-layer { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+  .bg-float { position: absolute; will-change: transform; }
+  .bg-blob { width: 100%; height: 100%; border-radius: 50%; filter: blur(70px); transform: translate(var(--px, 0), var(--py, 0)); transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .float-1 { width: 48vw; height: 48vw; top: -12%; right: -8%; animation: drift1 24s ease-in-out infinite; }
+  .float-1 .bg-blob { background: radial-gradient(circle, rgba(43,63,255,0.5), transparent 70%); }
+  .float-2 { width: 40vw; height: 40vw; bottom: -14%; left: -10%; animation: drift2 28s ease-in-out infinite; }
+  .float-2 .bg-blob { background: radial-gradient(circle, rgba(155,93,229,0.4), transparent 70%); }
+  .float-3 { width: 28vw; height: 28vw; top: 40%; left: 45%; animation: drift3 32s ease-in-out infinite; }
+  .float-3 .bg-blob { background: radial-gradient(circle, rgba(198,255,0,0.14), transparent 70%); }
+  @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6vw, 8vw) scale(1.15); } }
+  @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8vw, -6vw) scale(1.12); } }
+  @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(5vw,-5vw) scale(1.2); } 66% { transform: translate(-5vw,5vw) scale(0.88); } }
+
+  .grain { position: fixed; inset: 0; z-index: -1; opacity: 0.05; pointer-events: none; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+
+  .volt-trace { position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; overflow: hidden; }
+  .volt-trace::after { content: ''; position: absolute; top: 0; left: -25%; width: 25%; height: 100%; background: linear-gradient(90deg, transparent, var(--volt), transparent); animation: sweep 5s linear infinite; }
+  @keyframes sweep { from { left: -25%; } to { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .bg-float, .volt-trace::after { animation: none; } }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 5vw; backdrop-filter: blur(16px);
+    background: rgba(var(--bg-rgb),0.72); border-bottom: 1px solid rgba(var(--text-rgb),0.06);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent-text); text-decoration: none; }
+  .back-link { color: var(--on-surface); text-decoration: none; font-size: 0.875rem; font-weight: 500; opacity: 0.75; display: flex; align-items: center; gap: 0.4rem; }
+  .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--text-rgb),0.08); border: 1px solid rgba(var(--text-rgb),0.12);
+    cursor: pointer; font-size: 0.95rem; transition: background 0.2s, transform 0.3s;
+  }
+  .theme-toggle:hover { background: rgba(var(--text-rgb),0.14); transform: rotate(-12deg); }
+  .back-link:hover { opacity: 1; }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 10rem 5vw 6rem; }
+  .eyebrow { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-text); margin-bottom: 1.25rem; }
+  h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  .lede { color: rgba(var(--text-rgb),0.55); font-size: 1rem; margin-bottom: 2.5rem; }
+
+  /* ── LOADING ── */
+  .loading { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: 4rem 0; text-align: center; }
+  .spark { width: 46px; height: 46px; border-radius: 50%; border: 3px solid rgba(var(--text-rgb),0.15); border-top-color: var(--volt); animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: rgba(var(--text-rgb),0.6); font-size: 0.95rem; }
+
+  /* ── ERROR ── */
+  .error-box { padding: 2rem; border-radius: 1rem; border: 1px solid rgba(255,77,90,0.3); background: rgba(255,77,90,0.08); text-align: center; }
+  .error-box p { color: rgba(var(--text-rgb),0.7); margin-bottom: 1.25rem; }
+
+  /* ── QUOTE CARD ── */
+  .quote-card { border-radius: 1.5rem; border: 1px solid rgba(var(--text-rgb),0.1); background: rgba(var(--text-rgb),0.03); overflow: hidden; }
+  .quote-head { padding: 2rem; border-bottom: 1px solid rgba(var(--text-rgb),0.08); }
+  .quote-project { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.35rem; }
+  .quote-type { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(var(--text-rgb),0.45); }
+
+  .line-items { padding: 1.5rem 2rem; }
+  .line-item { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid rgba(var(--text-rgb),0.06); font-size: 0.95rem; }
+  .line-item:last-child { border-bottom: none; }
+  .line-item .amount { font-weight: 600; white-space: nowrap; }
+
+  .quote-total { display: flex; justify-content: space-between; align-items: baseline; padding: 1.5rem 2rem; background: rgba(var(--text-rgb),0.04); border-top: 1px solid rgba(var(--text-rgb),0.1); }
+  .quote-total .label { font-size: 0.95rem; color: rgba(var(--text-rgb),0.6); }
+  .quote-total .value { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--volt), var(--cobalt)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .quote-notes { padding: 1.5rem 2rem; font-size: 0.9rem; line-height: 1.65; color: rgba(var(--text-rgb),0.6); border-top: 1px dashed rgba(var(--text-rgb),0.12); }
+
+  .quote-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--coral); color: #fff; padding: 1rem 2.2rem; border-radius: 100px;
+    font-size: 1rem; font-weight: 700; border: none; cursor: pointer; flex: 1; min-width: 200px;
+    font-family: inherit; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,77,90,0.4); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary {
+    background: rgba(var(--text-rgb),0.06); color: var(--on-surface); padding: 1rem 2.2rem; border-radius: 100px;
+    font-size: 1rem; font-weight: 700; border: 1px solid rgba(var(--text-rgb),0.14); cursor: pointer;
+    font-family: inherit; transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(var(--text-rgb),0.1); }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status-banner { margin-top: 2rem; padding: 1.25rem 1.5rem; border-radius: 0.9rem; font-size: 0.95rem; display: none; }
+  .status-banner.visible { display: block; }
+  .status-banner.accepted { background: rgba(198,255,0,0.1); border: 1px solid rgba(198,255,0,0.3); color: var(--accent-text); }
+  .status-banner.rejected { background: rgba(var(--text-rgb),0.06); border: 1px solid rgba(var(--text-rgb),0.15); color: rgba(var(--text-rgb),0.7); }
+  .status-banner.error { background: rgba(255,77,90,0.08); border: 1px solid rgba(255,77,90,0.3); color: #FF4D5A; }
+
+  .hidden { display: none; }
+
+  /* ── BUDGET MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); padding: 1.5rem;
+  }
+  /* .modal-overlay sets display:flex AFTER the generic .hidden rule, so without this the
+     budget popup showed on page load and covered the AI quote. */
+  .modal-overlay.hidden { display: none; }
+  .modal-card {
+    width: 100%; max-width: 420px; background: var(--surface); border: 1px solid rgba(var(--text-rgb),0.12);
+    border-radius: 1.25rem; padding: 2rem; box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  }
+  .modal-card h2 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .modal-card p { font-size: 0.9rem; color: rgba(var(--text-rgb),0.6); margin-bottom: 1.5rem; line-height: 1.5; }
+  .modal-field-label { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; display: block; }
+  .modal-input-row { display: flex; align-items: center; background: rgba(var(--text-rgb),0.07); border: 1px solid rgba(var(--text-rgb),0.14); border-radius: 0.75rem; padding: 0 0.25rem 0 1rem; margin-bottom: 1.25rem; }
+  .modal-input-row span { font-weight: 700; color: rgba(var(--text-rgb),0.5); }
+  .modal-input-row input { flex: 1; background: none; border: none; outline: none; color: var(--on-surface); font-family: inherit; font-size: 1.1rem; font-weight: 600; padding: 0.85rem 0.5rem; }
+  .modal-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+  .modal-decline { background: none; border: none; color: rgba(var(--text-rgb),0.45); font-size: 0.85rem; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0.5rem; }
+  .modal-error { font-size: 0.85rem; color: var(--coral); margin-top: -0.75rem; margin-bottom: 1rem; display: none; }
+  .modal-error.visible { display: block; }
+  .counter-box { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <div class="bg-float float-1"><div class="bg-blob" data-depth="1"></div></div>
+  <div class="bg-float float-2"><div class="bg-blob" data-depth="1.6"></div></div>
+  <div class="bg-float float-3"><div class="bg-blob" data-depth="0.6"></div></div>
+</div>
+<div class="grain"></div>
+
+<nav>
+  <div class="volt-trace"></div>
+  <a href="/" class="logo">VOLTA</a>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">🌙</button>
+    <a href="/" class="back-link">← Back to site</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="eyebrow">✦ Your quote</div>
+  <h1 id="pageTitle">Putting it together...</h1>
+  <p class="lede" id="pageLede">Hang tight while we work out the numbers.</p>
+
+  <div class="loading" id="loadingState">
+    <div class="spark"></div>
+    <p id="loadingText">Loading your request...</p>
+  </div>
+
+  <div class="error-box hidden" id="errorState">
+    <p id="errorText">Something went wrong loading this quote.</p>
+    <button class="btn-primary" id="retryBtn" onclick="loadOrGenerate()">Try again</button>
+  </div>
+
+  <div class="hidden" id="quoteState">
+    <div class="quote-card">
+      <div class="quote-head">
+        <div class="quote-project" id="quoteProjectTitle"></div>
+        <div class="quote-type" id="quoteProjectType"></div>
+      </div>
+      <div class="line-items" id="lineItems"></div>
+      <div class="quote-total">
+        <span class="label">Total</span>
+        <span class="value" id="quoteTotal"></span>
+      </div>
+      <div class="quote-notes" id="quoteNotes"></div>
+    </div>
+
+    <div class="quote-actions" id="quoteActions">
+      <button class="btn-primary" id="acceptBtn" onclick="respond('accepted')">Accept quote →</button>
+      <button class="btn-secondary" id="rejectBtn" onclick="openBudgetModal()">Not right now</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+  </div>
+</div>
+
+<!-- Budget modal — shown when the client clicks "Not right now" -->
+<div class="modal-overlay hidden" id="budgetModal">
+  <div class="modal-card">
+    <h2>What's your budget?</h2>
+    <p>Tell us what you can realistically spend and we'll let you know if we can make it work — or come back with a number that does.</p>
+    <label class="modal-field-label" for="budgetInput">Your budget</label>
+    <div class="modal-input-row">
+      <span>£</span>
+      <input type="number" id="budgetInput" min="1" placeholder="e.g. 400" />
+    </div>
+    <div class="modal-error" id="budgetError"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="submitBudgetBtn" onclick="submitBudget()">Send my budget →</button>
+      <button class="modal-decline" onclick="declineOutright()">No thanks, I'll pass on this one</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  const params = new URLSearchParams(window.location.search);
+  const requestId = params.get('id');
+
+  const loadingState = document.getElementById('loadingState');
+  const loadingText = document.getElementById('loadingText');
+  const errorState = document.getElementById('errorState');
+  const errorText = document.getElementById('errorText');
+  const quoteState = document.getElementById('quoteState');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageLede = document.getElementById('pageLede');
+
+  function showLoading(text) {
+    loadingState.classList.remove('hidden');
+    errorState.classList.add('hidden');
+    quoteState.classList.add('hidden');
+    loadingText.textContent = text;
+  }
+  function showError(text) {
+    loadingState.classList.add('hidden');
+    errorState.classList.remove('hidden');
+    quoteState.classList.add('hidden');
+    errorText.textContent = text;
+  }
+  function showQuote() {
+    loadingState.classList.add('hidden');
+    errorState.classList.add('hidden');
+    quoteState.classList.remove('hidden');
+  }
+
+  const TYPE_LABELS = {
+    simple_website: 'Simple website',
+    ecommerce: 'E-commerce',
+    mobile_app: 'Mobile app',
+    web_app: 'Web app',
+    not_sure: 'Project',
+  };
+
+  function renderQuote(request, quote) {
+    pageTitle.textContent = 'Here\'s your quote';
+    pageLede.textContent = `For ${request.projectTitle}, itemised below.`;
+
+    document.getElementById('quoteProjectTitle').textContent = request.projectTitle;
+    document.getElementById('quoteProjectType').textContent = TYPE_LABELS[request.projectType] || request.projectType;
+
+    const lineItems = (quote && quote.lineItems) || request.quoteBreakdown || [];
+    const container = document.getElementById('lineItems');
+    container.innerHTML = lineItems.map(item => `
+      <div class="line-item">
+        <span>${item.label}</span>
+        <span class="amount">£${Number(item.amount).toLocaleString('en-GB')}</span>
+      </div>
+    `).join('');
+
+    const total = (quote && quote.total) || request.quotedPrice || 0;
+    document.getElementById('quoteTotal').textContent = `£${Number(total).toLocaleString('en-GB')}`;
+
+    const notes = (quote && quote.notes) || request.quoteNotes;
+    const notesEl = document.getElementById('quoteNotes');
+    if (notes) { notesEl.textContent = notes; notesEl.classList.remove('hidden'); }
+    else { notesEl.classList.add('hidden'); }
+
+    const banner = document.getElementById('statusBanner');
+    const actions = document.getElementById('quoteActions');
+
+    if (request.negotiationStatus === 'pending') {
+      actions.classList.add('hidden');
+      banner.innerHTML = `We've sent your budget of <strong>£${Number(request.clientBudget).toLocaleString('en-GB')}</strong> to the team — we'll get back to you shortly, usually within a day.`;
+      banner.innerHTML += `<br /><a href="status.html?id=${requestId}" style="color: var(--accent-text); font-weight: 600;">Track your project →</a>`;
+      banner.className = 'status-banner visible accepted';
+    } else if (request.negotiationStatus === 'countered') {
+      actions.classList.add('hidden');
+      banner.innerHTML = `We can do this for <strong>£${Number(request.counterPrice).toLocaleString('en-GB')}</strong> instead.`;
+      banner.innerHTML += `<div class="counter-box">
+        <button class="btn-primary" style="flex:1; min-width:160px;" onclick="respondCounter('accepted')" id="acceptCounterBtn">Accept this price →</button>
+        <button class="btn-secondary" style="flex:1; min-width:160px;" onclick="respondCounter('rejected')" id="declineCounterBtn">Decline</button>
+      </div>`;
+      banner.className = 'status-banner visible accepted';
+    } else if (request.status === 'accepted' && !request.depositPaid) {
+      actions.classList.add('hidden');
+      banner.innerHTML = `You've accepted this quote. <button class="btn-primary" style="margin-left:0.5rem;" onclick="payDeposit()" id="payDepositBtn">Pay deposit →</button>`;
+      banner.innerHTML += `<br /><a href="status.html?id=${requestId}" style="color: var(--accent-text); font-weight: 600;">Track your project →</a>`;
+      banner.className = 'status-banner visible accepted';
+    } else if (request.status === 'accepted' && request.depositPaid) {
+      actions.classList.add('hidden');
+      banner.textContent = "You've accepted this quote and paid your deposit — we'll be in touch about next steps.";
+      banner.innerHTML += ` <a href="status.html?id=${requestId}" style="color: var(--accent-text); font-weight: 600;">Track your project →</a>`;
+      banner.className = 'status-banner visible accepted';
+    } else if (request.status === 'rejected') {
+      actions.classList.add('hidden');
+      banner.textContent = "You've declined this quote. If anything changes, just get back in touch.";
+      banner.className = 'status-banner visible rejected';
+    } else {
+      actions.classList.remove('hidden');
+      banner.className = 'status-banner';
+    }
+
+    showQuote();
+  }
+
+  async function respond(decision) {
+    const acceptBtn = document.getElementById('acceptBtn');
+    const rejectBtn = document.getElementById('rejectBtn');
+    acceptBtn.disabled = true;
+    rejectBtn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision }),
+      });
+      const updated = await res.json();
+      if (!res.ok) throw new Error(updated.error || 'Something went wrong');
+      renderQuote(updated, null);
+    } catch (err) {
+      const banner = document.getElementById('statusBanner');
+      banner.textContent = err.message || 'Could not save your response — please try again.';
+      banner.className = 'status-banner visible error';
+      acceptBtn.disabled = false;
+      rejectBtn.disabled = false;
+    }
+  }
+
+  // ── Budget negotiation ──────────────────────────────────────
+  const budgetModal = document.getElementById('budgetModal');
+  const budgetInput = document.getElementById('budgetInput');
+  const budgetError = document.getElementById('budgetError');
+
+  function openBudgetModal() {
+    budgetError.classList.remove('visible');
+    budgetInput.value = '';
+    budgetModal.classList.remove('hidden');
+    budgetInput.focus();
+  }
+  function closeBudgetModal() {
+    budgetModal.classList.add('hidden');
+  }
+
+  async function submitBudget() {
+    const amount = Number(budgetInput.value);
+    if (!amount || amount <= 0) {
+      budgetError.textContent = 'Please enter a valid amount.';
+      budgetError.classList.add('visible');
+      return;
+    }
+    const btn = document.getElementById('submitBudgetBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}/propose-budget`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ budget: amount }),
+      });
+      const updated = await res.json();
+      if (!res.ok) throw new Error(updated.error || 'Could not send your budget.');
+      closeBudgetModal();
+      renderQuote(updated, null);
+    } catch (err) {
+      budgetError.textContent = err.message;
+      budgetError.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send my budget →';
+    }
+  }
+
+  function declineOutright() {
+    closeBudgetModal();
+    respond('rejected');
+  }
+
+  async function respondCounter(decision) {
+    const acceptBtn = document.getElementById('acceptCounterBtn');
+    const declineBtn = document.getElementById('declineCounterBtn');
+    if (acceptBtn) acceptBtn.disabled = true;
+    if (declineBtn) declineBtn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}/respond-counter`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision }),
+      });
+      const updated = await res.json();
+      if (!res.ok) throw new Error(updated.error || 'Something went wrong');
+      renderQuote(updated, null);
+    } catch (err) {
+      const banner = document.getElementById('statusBanner');
+      banner.innerHTML += `<div style="margin-top:0.75rem; color: var(--coral);">${err.message}</div>`;
+      if (acceptBtn) acceptBtn.disabled = false;
+      if (declineBtn) declineBtn.disabled = false;
+    }
+  }
+
+  async function payDeposit() {
+    const btn = document.getElementById('payDepositBtn');
+    const banner = document.getElementById('statusBanner');
+    if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to payment...'; }
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}/create-checkout-session`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not start payment');
+      window.location.href = data.url; // off to Stripe Checkout
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Pay deposit →'; }
+      banner.innerHTML += `<div style="margin-top:0.75rem; color: var(--coral);">${err.message}</div>`;
+    }
+  }
+
+  async function loadOrGenerate() {
+    if (!requestId) {
+      showError('No request ID was given — please submit the project form again.');
+      return;
+    }
+    showLoading('Loading your request...');
+    try {
+      const res = await fetch(`${API}/api/requests/${requestId}`);
+      const request = await res.json();
+      if (!res.ok) throw new Error(request.error || 'Request not found');
+
+      if (request.quotedPrice && request.quoteBreakdown && request.quoteBreakdown.length) {
+        renderQuote(request, null);
+        if (params.get('payment') === 'cancelled') {
+          const banner = document.getElementById('statusBanner');
+          banner.innerHTML += `<div style="margin-top:0.75rem; color: var(--coral);">Payment was cancelled — you can try again whenever you're ready.</div>`;
+        } else if (params.get('payment') === 'error') {
+          const banner = document.getElementById('statusBanner');
+          banner.classList.add('visible');
+          banner.innerHTML += `<div style="margin-top:0.75rem; color: var(--coral);">We couldn't open the payment page from that link. Please try again, or reply to our email and we'll sort it.</div>`;
+        }
+        return;
+      }
+
+      // No quote yet (instant generation failed at submission time) — retry now.
+      showLoading('Generating your itemised quote...');
+      const quoteRes = await fetch(`${API}/api/requests/${requestId}/quote`, { method: 'POST' });
+      const quoteData = await quoteRes.json();
+      if (!quoteRes.ok) throw new Error(quoteData.error || 'Could not generate a quote');
+
+      renderQuote(quoteData.request, quoteData.quote);
+    } catch (err) {
+      showError(err.message || 'Something went wrong loading this quote.');
+    }
+  }
+
+  // ── Theme ──────────────────────────────────────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('volta_theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    applyTheme(current === 'light' ? 'dark' : 'light');
+  }
+  applyTheme(localStorage.getItem('volta_theme') || 'dark');
+
+  // ── Ambient background parallax ─────────────────────────────
+  const bgBlobs = document.querySelectorAll('.bg-blob');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reducedMotion && bgBlobs.length) {
+    window.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5);
+      bgBlobs.forEach(b => {
+        const depth = parseFloat(b.dataset.depth || 1);
+        b.style.setProperty('--px', `${x * depth * 30}px`);
+        b.style.setProperty('--py', `${y * depth * 30}px`);
+      });
+    });
+  }
+
+  loadOrGenerate();
+</script>
+</body>
+</html>
