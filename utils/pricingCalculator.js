@@ -121,10 +121,20 @@ async function generateQuote(request) {
 
   // Hard floor — never let the AI's number undercut the studio's current
   // stated minimum, and never let a rush job slip below the rush multiplier.
+  // The total is always recalculated from the line items so the breakdown
+  // the client sees adds up exactly, whatever the AI wrote as "total".
+  quote.lineItems = (Array.isArray(quote.lineItems) ? quote.lineItems : [])
+    .map(item => ({ label: String(item.label || 'Item'), amount: Math.max(0, Math.round(Number(item.amount) || 0)) }))
+    .filter(item => item.amount > 0);
+  let total = quote.lineItems.reduce((sum, item) => sum + item.amount, 0);
+
   const floor = request.timeline === 'rush' ? Math.round(minimum * rushMultiplier) : minimum;
-  if (!quote.total || quote.total < floor) {
-    quote.total = floor;
+  if (total < floor) {
+    // Show the top-up as its own line, so the breakdown still matches the total.
+    quote.lineItems.push({ label: 'Minimum project price adjustment', amount: floor - total });
+    total = floor;
   }
+  quote.total = total;
 
   return quote;
 }
