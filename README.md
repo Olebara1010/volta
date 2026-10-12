@@ -1,139 +1,90 @@
-# ⚡ VOLTA Studio — Full Stack Website
+# ⚡ Volta
 
-A modern creative studio website with a Node.js/Express backend, SQLite database, email notifications, user authentication, contact form, and newsletter system.
+**Live at [getvoltastudio.co.uk](https://getvoltastudio.co.uk)**
+
+Volta is a full-stack platform where businesses order a website or app online. A client describes what they need, gets an itemised AI-generated quote in seconds, can negotiate a price, pays a deposit through Stripe, tracks progress live and downloads the finished files once the balance is paid.
+
+I designed, built and deployed it end to end.
 
 ---
 
-## 📁 Project Structure
+## How it works
+
+1. **Choose a project:** business website, online store, booking system, portfolio, web app or mobile app.
+2. **Describe it:** features, design references and timeline.
+3. **Instant AI quote:** the Claude API turns the brief into an itemised price breakdown, with the reasoning explained.
+4. **Negotiate:** if the quote is too high, the client proposes a budget. The admin accepts it or sends a counter-offer.
+5. **Pay a 25% deposit:** the client gets a one-click payment link by email that opens Stripe Checkout.
+6. **Track the project:** by project ID or email, with a live progress stepper.
+7. **Delivery:** files unlock for download once the balance is paid.
+
+---
+
+## Technical highlights
+
+- **AI integration with guardrails:** quotes come from the Claude API as structured JSON. The server re-totals every line item and enforces the admin-configured minimum prices and rush multiplier, so the AI can never quote below the floor and the breakdown always matches the total.
+- **Stripe Checkout and verified webhooks:** deposits and balance payments run through Stripe Checkout. The webhook route uses a raw-body parser registered *before* the JSON middleware, so Stripe's signature verification works, and payment status updates automatically.
+- **Payment-gated downloads:** delivered files can only be downloaded once the project is paid in full, and this is enforced on the server.
+- **Transactional email that works in production:** the hosting platform blocks outbound SMTP, so email goes through the Resend HTTPS API from a verified custom domain, with an SMTP fallback for local development.
+- **Admin dashboard:** JWT-secured. It manages pricing settings, accept/counter decisions, status updates, file delivery and resending payment emails.
+- **Rate-limited API routes** and input validation on all public endpoints.
+
+---
+
+## Tech stack
+
+| Area | Tools |
+|---|---|
+| Backend | Node.js, Express |
+| Database | MongoDB Atlas (Mongoose) |
+| AI | Claude API (Anthropic) |
+| Payments | Stripe Checkout + webhooks |
+| Email | Resend API (Nodemailer for local SMTP) |
+| Auth | JWT, bcrypt |
+| Frontend | HTML, CSS, JavaScript (light/dark theme) |
+| Hosting | Railway, with Cloudflare for DNS and email routing |
+
+---
+
+## Project structure
 
 ```
 volta/
-├── server.js              # Main Express server
-├── package.json
-├── .env.example           # ← Copy this to .env and fill in your values
-├── db/
-│   └── database.js        # SQLite setup (creates volta.db automatically)
+├── server.js               # Express app, middleware, routes
+├── db/database.js          # Mongoose models and data access
+├── middleware/             # JWT auth and admin auth
 ├── routes/
-│   ├── auth.js            # Register, login, /me
-│   ├── contact.js         # Contact form submissions
-│   └── newsletter.js      # Subscribe / unsubscribe
-├── middleware/
-│   └── auth.js            # JWT verification
+│   ├── projectRequests.js  # Requests, quotes, negotiation, Stripe checkout, file delivery
+│   ├── stripeWebhook.js    # Verified Stripe webhook handler
+│   ├── admin.js            # Admin login and settings
+│   ├── auth.js, contact.js, newsletter.js
 ├── utils/
-│   └── mailer.js          # Nodemailer email templates
-└── public/
-    └── index.html         # The full frontend
+│   ├── pricingCalculator.js  # Claude API quote generation and price-floor enforcement
+│   └── mailer.js             # Resend / SMTP email templates
+└── public/                 # Frontend pages: home, request, quote, status, admin
 ```
 
 ---
 
-## 🚀 Quick Start
+## Running locally
 
-### 1. Install dependencies
 ```bash
+git clone https://github.com/Olebara1010/volta.git
 cd volta
 npm install
-```
-
-### 2. Set up environment variables
-```bash
-cp .env.example .env
-```
-Open `.env` and fill in:
-- Your **Gmail address** and an [App Password](https://support.google.com/accounts/answer/185833)
-- A long random **JWT_SECRET** string
-- The **email address** where you want to receive notifications
-
-### 3. Run the server
-```bash
-# Development (auto-restart on changes)
+cp .env.example .env   # then fill in your own values
 npm run dev
-
-# Production
-npm start
 ```
 
-Visit **http://localhost:3000** — the site is live!
+Open http://localhost:3000. To test payments locally, forward Stripe events with the Stripe CLI:
 
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Create account |
-| POST | `/api/auth/login` | Sign in, get JWT |
-| GET | `/api/auth/me` | Get current user (auth required) |
-| POST | `/api/contact` | Submit contact form |
-| GET | `/api/contact` | List all contacts |
-| POST | `/api/newsletter/subscribe` | Subscribe to newsletter |
-| POST | `/api/newsletter/unsubscribe` | Unsubscribe |
-| GET | `/api/newsletter/subscribers` | List all subscribers |
-| GET | `/api/health` | Health check |
-
----
-
-## 📧 Email Setup (Gmail)
-
-1. Go to your Google Account → Security → 2-Step Verification (enable it)
-2. Go to **App Passwords** → create one for "Mail"
-3. Paste the 16-character password into `EMAIL_PASS` in your `.env`
-
-> **Other providers:** Change `EMAIL_HOST` and `EMAIL_PORT` for Outlook, SendGrid, Mailgun, etc.
-
----
-
-## 🌍 Deploying Online (Free)
-
-### Option A — Railway (easiest, recommended)
-1. Push this folder to a GitHub repo
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-3. Add your `.env` variables in the Railway dashboard
-4. Done — Railway gives you a live URL instantly
-
-### Option B — Render
-1. Push to GitHub
-2. [render.com](https://render.com) → New Web Service → connect repo
-3. Set Build Command: `npm install`, Start Command: `npm start`
-4. Add environment variables
-
-### Option C — VPS (DigitalOcean, Linode, etc.)
 ```bash
-git clone your-repo && cd volta
-npm install
-cp .env.example .env && nano .env   # fill in values
-npm install -g pm2
-pm2 start server.js --name volta
-pm2 save
+stripe listen --forward-to localhost:3000/api/stripe-webhook
 ```
 
 ---
 
-## 🗃️ Database
+## Author
 
-SQLite file (`volta.db`) is created automatically on first run. Three tables:
-
-- **users** — registered accounts (passwords are bcrypt-hashed)
-- **contacts** — contact form submissions
-- **subscribers** — newsletter emails
-
-To view the database, install [DB Browser for SQLite](https://sqlitebrowser.org/) and open `db/volta.db`.
-
----
-
-## 🔒 Security Features
-
-- Passwords hashed with **bcrypt** (12 rounds)
-- **JWT** tokens (7-day expiry)
-- **Rate limiting** — 50 req/15min globally, 10 req/15min on auth routes
-- Input **validation** on all endpoints
-- **CORS** configured for your frontend URL
-
----
-
-## ✏️ Customisation
-
-- Change studio name/content in `public/index.html`
-- Update `NOTIFY_EMAIL` in `.env` to receive submissions
-- Email templates are in `utils/mailer.js`
-- Swap SQLite for PostgreSQL/MySQL by replacing `better-sqlite3` with `pg` or `mysql2`
+**Chigozirim Olebara**, full-stack software developer, Birmingham, UK
+[LinkedIn](https://www.linkedin.com/in/chigozirim-olebara-a79277275) · [getvoltastudio.co.uk](https://getvoltastudio.co.uk)
