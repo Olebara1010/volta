@@ -1,5 +1,7 @@
 # ⚡ Volta
 
+[![Tests](https://github.com/Olebara1010/volta/actions/workflows/tests.yml/badge.svg)](https://github.com/Olebara1010/volta/actions/workflows/tests.yml)
+
 **Live at [getvoltastudio.co.uk](https://getvoltastudio.co.uk)**
 
 Volta is a full-stack platform where businesses order a website or app online. A client describes what they need, gets an itemised AI-generated quote in seconds, can negotiate a price, pays a deposit through Stripe, tracks progress live and downloads the finished files once the balance is paid.
@@ -29,6 +31,8 @@ I designed, built and deployed it end to end.
 - **Admin dashboard:** JWT-secured. It manages pricing settings, accept/counter decisions, status updates, file delivery and resending payment emails.
 - **Rate-limited API routes** and input validation on all public endpoints.
 
+- **Automated tests:** 19 Jest + Supertest tests cover the AI price-floor logic, Stripe webhook signature verification and payment handling, payment-gated downloads and admin authentication. They run on every push via GitHub Actions.
+
 ---
 
 ## Tech stack
@@ -43,6 +47,7 @@ I designed, built and deployed it end to end.
 | Auth | JWT, bcrypt |
 | Frontend | HTML, CSS, JavaScript (light/dark theme) |
 | Hosting | Railway, with Cloudflare for DNS and email routing |
+| Testing / CI | Jest, Supertest, GitHub Actions |
 
 ---
 
@@ -75,6 +80,8 @@ npm install
 cp .env.example .env   # then fill in your own values
 npm run dev
 ```
+
+Run the tests with `npm test`. They need no database or API keys, because external services are mocked.
 
 Open http://localhost:3000. To test payments locally, forward Stripe events with the Stripe CLI:
 
