@@ -39,7 +39,7 @@
   .lede { color: var(--slate); font-size: 1.075rem; max-width: 46ch; }
 
   section.q-block { padding: 2.5rem 0; border-top: 1px solid var(--rule); }
-  form section.q-block:first-child { margin-top: 2.5rem; }
+  #request-form { margin-top: 2.5rem; }
   .q { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; margin-bottom: 0.3rem; }
   .q-hint { color: var(--slate); font-size: 0.925rem; margin-bottom: 1.25rem; }
 
@@ -77,6 +77,43 @@
 
   @media (max-width: 640px) { .checks { grid-template-columns: 1fr; } .back-link { display: none; } }
   @media (prefers-reduced-motion: reduce) { .btn-primary:hover { transform: none; } }
+
+  /* ── AI brief assistant ── */
+  .assistant { margin-top: 2.5rem; border: 1px solid var(--rule); border-radius: 14px; background: var(--slip); overflow: hidden; }
+  .assistant-intro { display: flex; gap: 1rem 1.5rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 1.4rem 1.5rem; }
+  .assistant-intro .q-hint { margin-bottom: 0; max-width: 40ch; }
+  .kicker { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cobalt); margin-bottom: 0.35rem; }
+  .kicker svg { width: 0.9rem; height: 0.9rem; fill: var(--spark); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+  .btn-secondary { background: none; color: var(--ink); border: 1px solid var(--ink); padding: 0.75rem 1.15rem; border-radius: 8px; font: 600 0.95rem/1 var(--body); cursor: pointer; white-space: nowrap; }
+  .btn-secondary:hover { background: var(--ink); color: var(--paper); }
+  .chat { border-top: 1px solid var(--rule); }
+  .chat-log { display: flex; flex-direction: column; gap: 0.7rem; padding: 1.25rem 1.5rem; max-height: 440px; overflow-y: auto; }
+  .bubble { max-width: 85%; padding: 0.7rem 0.95rem; border-radius: 12px; font-size: 0.975rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bubble.bot { align-self: flex-start; background: var(--paper); border: 1px solid var(--rule); border-bottom-left-radius: 4px; }
+  .bubble.me { align-self: flex-end; background: var(--cobalt); color: var(--cobalt-ink); border-bottom-right-radius: 4px; }
+  .bubble.error { align-self: flex-start; color: var(--error); background: none; padding-left: 0; }
+  .typing { display: inline-flex; gap: 4px; padding: 0.95rem; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--slate); animation: blink 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; } .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+  .brief-card { align-self: stretch; border: 1px solid var(--cobalt); border-radius: 12px; padding: 1rem 1.1rem; background: var(--paper); }
+  .brief-card h3 { font-family: var(--display); font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: 0.15rem; }
+  .brief-meta { color: var(--slate); font-size: 0.875rem; margin-bottom: 0.6rem; }
+  .brief-card p.brief-desc { font-size: 0.95rem; margin-bottom: 0.6rem; }
+  .brief-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+  .brief-tags span { font-size: 0.8rem; border: 1px solid var(--rule); border-radius: 100px; padding: 0.15rem 0.6rem; }
+  .brief-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .brief-actions .btn-primary { width: auto; margin-top: 0; padding: 0.8rem 1.15rem; font-size: 0.95rem; }
+  .chat-input { display: flex; gap: 0.6rem; align-items: flex-end; padding: 0 1.5rem 0.6rem; }
+  .chat-input textarea.field { min-height: 0; resize: none; }
+  .btn-send { background: var(--cobalt); color: var(--cobalt-ink); border: 0; border-radius: 8px; padding: 0.85rem 1.1rem; font: 600 0.95rem/1 var(--body); cursor: pointer; }
+  .btn-send:disabled { opacity: 0.55; cursor: not-allowed; }
+  .chat-foot { color: var(--slate); font-size: 0.8rem; padding: 0 1.5rem 1.1rem; }
+  .chat.hidden, .chat-input.hidden { display: none; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filled { animation: filled 2.4s ease-out; }
+  @keyframes filled { 0%, 30% { border-color: var(--cobalt); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 25%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .typing span, .filled { animation: none; } }
   /* Spam trap: hidden from people, bots fill it in */
   .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
@@ -96,6 +133,26 @@
 <div class="wrap">
   <h1>Tell us what you're building.</h1>
   <p class="lede">The more detail you give us here, the more accurate your quote will be. It takes about three minutes, and your itemised quote appears straight after.</p>
+
+  <section class="assistant" id="assistant" aria-labelledby="assistantTitle">
+    <div class="assistant-intro">
+      <div>
+        <p class="kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg>AI brief assistant</p>
+        <p class="q" id="assistantTitle">Not sure how to describe it?</p>
+        <p class="q-hint">Answer a few quick questions and the assistant fills in the form below for you.</p>
+      </div>
+      <button type="button" class="btn-secondary" id="assistantStart">Help me describe it</button>
+    </div>
+    <div class="chat hidden" id="chat">
+      <div class="chat-log" id="chatLog" aria-live="polite"></div>
+      <form class="chat-input" id="chatForm">
+        <label for="chatText" class="sr-only">Your message</label>
+        <textarea class="field" id="chatText" rows="2" maxlength="1500" placeholder="Type your answer..."></textarea>
+        <button type="submit" class="btn-send" id="chatSend">Send</button>
+      </form>
+      <p class="chat-foot">Powered by Claude. Please don't share passwords or payment details in the chat.</p>
+    </div>
+  </section>
 
   <form id="request-form">
     <div class="hp-field" aria-hidden="true"><label for="website">Leave this empty</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
@@ -276,6 +333,153 @@
       }
     }
   });
+
+  // ── AI brief assistant ───────────────────────────────────
+  // A short chat with Claude that ends in a draft brief, which then fills in
+  // the form. The conversation lives only in this page; nothing is saved
+  // until the client submits the form themselves.
+  const TYPE_NAMES = { simple_website: 'Simple website', ecommerce: 'E-commerce', web_app: 'Web app', mobile_app: 'Mobile app', not_sure: 'Not sure yet' };
+  const FEATURE_NAMES = { userAccounts: 'User accounts', payments: 'Payments', adminPanel: 'Admin panel', thirdPartyIntegrations: 'Integrations', fileUploads: 'File uploads', search: 'Search', multiLanguage: 'Multiple languages' };
+  const TIMELINE_NAMES = { no_rush: 'No rush', two_to_four_weeks: '2–4 weeks', rush: 'As soon as possible' };
+  const OPENING = "Hi! In a sentence or two, what would you like built, and what's it for?";
+
+  const chat = document.getElementById('chat');
+  const chatLog = document.getElementById('chatLog');
+  const chatForm = document.getElementById('chatForm');
+  const chatText = document.getElementById('chatText');
+  const chatSend = document.getElementById('chatSend');
+  const startBtn = document.getElementById('assistantStart');
+  let conversation = [];
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text; // textContent, never innerHTML, for chat text
+    return node;
+  }
+  function addBubble(kind, text) {
+    const b = el('div', `bubble ${kind}`, text);
+    chatLog.appendChild(b);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return b;
+  }
+  function setBusy(busy) {
+    chatSend.disabled = busy;
+    chatText.disabled = busy;
+    if (busy) {
+      const t = el('div', 'bubble bot typing');
+      t.id = 'typing';
+      t.setAttribute('aria-label', 'Assistant is typing');
+      t.append(el('span'), el('span'), el('span'));
+      chatLog.appendChild(t);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    } else {
+      document.getElementById('typing')?.remove();
+      chatText.focus();
+    }
+  }
+
+  function startChat() {
+    conversation = [];
+    chatLog.replaceChildren();
+    chat.classList.remove('hidden');
+    chatForm.classList.remove('hidden');
+    startBtn.textContent = 'Start again';
+    addBubble('bot', OPENING);
+    chatText.value = '';
+    chatText.focus();
+  }
+  startBtn.addEventListener('click', startChat);
+
+  chatText.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+  });
+
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = chatText.value.trim();
+    if (!text || chatSend.disabled) return;
+    chatText.value = '';
+    addBubble('me', text);
+    conversation.push({ role: 'user', content: text });
+    setBusy(true);
+    try {
+      const res = await fetch(`${API}/api/brief`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversation }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+      setBusy(false);
+      conversation.push({ role: 'assistant', content: data.reply });
+      addBubble('bot', data.reply);
+      if (data.brief) showBrief(data.brief);
+    } catch (err) {
+      setBusy(false);
+      conversation.pop(); // let them try sending that message again
+      chatText.value = text;
+      addBubble('error', err.message || "The assistant couldn't reply. Please try again.");
+    }
+  });
+
+  function showBrief(brief) {
+    const card = el('div', 'brief-card');
+    card.appendChild(el('h3', '', brief.projectTitle));
+    const meta = [TYPE_NAMES[brief.projectType], brief.timeline && TIMELINE_NAMES[brief.timeline]].filter(Boolean).join(' · ');
+    card.appendChild(el('p', 'brief-meta', meta));
+    card.appendChild(el('p', 'brief-desc', brief.description));
+    const tags = el('div', 'brief-tags');
+    Object.keys(FEATURE_NAMES).filter(k => brief.features[k]).forEach(k => tags.appendChild(el('span', '', FEATURE_NAMES[k])));
+    if (brief.features.other) tags.appendChild(el('span', '', brief.features.other));
+    if (tags.children.length) card.appendChild(tags);
+
+    const actions = el('div', 'brief-actions');
+    const fillBtn = el('button', 'btn-primary', 'Fill in the form for me');
+    fillBtn.type = 'button';
+    fillBtn.addEventListener('click', () => {
+      fillForm(brief);
+      fillBtn.disabled = true;
+      fillBtn.textContent = 'Form filled in';
+      addBubble('bot', 'Done. Add your name and email, check the details, then press "Get my quote".');
+    });
+    actions.appendChild(fillBtn);
+    card.appendChild(actions);
+    chatLog.appendChild(card);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    chatForm.classList.add('hidden'); // the chat's job is done; "Start again" reopens it
+  }
+
+  function flash(node) {
+    const target = node.closest('.choice, .check') || node;
+    target.classList.remove('filled'); void target.offsetWidth; target.classList.add('filled');
+  }
+  function setValue(name, value) {
+    const field = form.elements[name];
+    if (field && value) { field.value = value; flash(field); }
+  }
+  function setRadio(name, value) {
+    const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
+    if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); flash(radio); }
+  }
+
+  function fillForm(brief) {
+    setValue('projectTitle', brief.projectTitle);
+    setValue('description', brief.description);
+    setRadio('projectType', brief.projectType);
+    Object.keys(FEATURE_NAMES).forEach(k => {
+      const box = form.elements[k];
+      box.checked = Boolean(brief.features[k]);
+      if (box.checked) flash(box);
+    });
+    setValue('featuresOther', brief.features.other);
+    setValue('designReferences', brief.designReferences);
+    if (brief.timeline) setRadio('timeline', brief.timeline);
+    setValue('additionalNotes', brief.additionalNotes);
+    const name = form.elements.clientName;
+    name.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => name.focus({ preventScroll: true }), 400);
+  }
 
   // ── Theme (same setting as the homepage) ─────────────────
   function applyTheme(theme) {

@@ -49,6 +49,7 @@ app.use('/api/auth',       require('./routes/auth'));
 app.use('/api/contact',    require('./routes/contact'));
 app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/requests',   require('./routes/projectRequests'));
+app.use('/api/brief',      require('./routes/brief'));
 app.use('/api/admin',      require('./routes/admin'));
 
 // ── Health check ───────────────────────────────────────────

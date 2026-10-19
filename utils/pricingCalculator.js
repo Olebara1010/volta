@@ -5,6 +5,7 @@
 // These defaults are only used if no settings document exists yet.
 
 const db = require('../db/database');
+const { callClaude, parseJsonReply } = require('./claude');
 
 const DEFAULT_PRICING_MINIMUMS = {
   simple_website: 500,
@@ -65,9 +66,6 @@ All amounts are whole-number GBP. "total" must equal the sum of lineItems, and m
 }
 
 async function generateQuote(request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set in your environment.');
-
   // Pull current pricing from the database — falls back to the hardcoded
   // defaults above only if the DB read fails or nothing's been saved yet.
   let settings;
@@ -88,35 +86,13 @@ async function generateQuote(request) {
 
   const minimum = minimums[request.projectType] ?? minimums.simple_website;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-5',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: buildPrompt(request, minimums, rushMultiplier) }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Claude API error (${response.status}): ${errText}`);
-  }
-
-  const data = await response.json();
-  const textBlock = (data.content || []).find(b => b.type === 'text');
-  if (!textBlock) throw new Error('Claude API returned no text content.');
-
   let quote;
   try {
-    const cleaned = textBlock.text.trim().replace(/^```json\s*|```$/g, '');
-    quote = JSON.parse(cleaned);
+    const text = await callClaude({ messages: [{ role: 'user', content: buildPrompt(request, minimums, rushMultiplier) }] });
+    quote = parseJsonReply(text);
   } catch (err) {
-    throw new Error(`Could not parse the quote JSON: ${err.message}`);
+    if (err instanceof SyntaxError) throw new Error(`Could not parse the quote JSON: ${err.message}`);
+    throw err;
   }
 
   // Hard floor — never let the AI's number undercut the studio's current

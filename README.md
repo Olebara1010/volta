@@ -13,7 +13,7 @@ I designed, built and deployed it end to end.
 ## How it works
 
 1. **Choose a project:** business website, online store, booking system, portfolio, web app or mobile app.
-2. **Describe it:** features, design references and timeline.
+2. **Describe it:** fill in the form, or let the **AI brief assistant** ask a few plain-English questions and fill it in for you.
 3. **Instant AI quote:** the Claude API turns the brief into an itemised price breakdown, with the reasoning explained.
 4. **Negotiate:** if the quote is too high, the client proposes a budget. The admin accepts it or sends a counter-offer.
 5. **Pay a 25% deposit:** the client gets a one-click payment link by email that opens Stripe Checkout.
@@ -25,11 +25,12 @@ I designed, built and deployed it end to end.
 ## Technical highlights
 
 - **AI integration with guardrails:** quotes come from the Claude API as structured JSON. The server re-totals every line item and enforces the admin-configured minimum prices and rush multiplier, so the AI can never quote below the floor and the breakdown always matches the total.
+- **AI brief assistant:** a short chat for clients who don't know the technical words. Claude asks up to three questions, one at a time, then returns a structured brief that fills in the request form. The server validates the conversation, keeps only known fields and options from the model's output, and rate-limits the chat with a daily cap on AI calls.
 - **Stripe Checkout and verified webhooks:** deposits and balance payments run through Stripe Checkout. The webhook route uses a raw-body parser registered *before* the JSON middleware, so Stripe's signature verification works, and payment status updates automatically.
 - **Payment-gated downloads:** delivered files can only be downloaded once the project is paid in full, and this is enforced on the server.
 - **Transactional email that works in production:** the hosting platform blocks outbound SMTP, so email goes through the Resend HTTPS API from a verified custom domain, with an SMTP fallback for local development.
 - **Admin dashboard:** JWT-secured. It manages pricing settings, accept/counter decisions, status updates, file delivery and resending payment emails.
-- **Rate-limited API routes** and input validation on all public endpoints.
+- **Security hardening:** security headers and a Content Security Policy (helmet), field whitelisting on every form, a honeypot spam trap, HTML escaping of user text in pages and emails, and rate-limited API routes.
 
 - **Automated tests:** 19 Jest + Supertest tests cover the AI price-floor logic, Stripe webhook signature verification and payment handling, payment-gated downloads and admin authentication. They run on every push via GitHub Actions.
 
@@ -65,6 +66,8 @@ volta/
 │   ├── auth.js, contact.js, newsletter.js
 ├── utils/
 │   ├── pricingCalculator.js  # Claude API quote generation and price-floor enforcement
+│   ├── briefAssistant.js     # AI brief assistant chat
+│   ├── claude.js             # Shared Claude API client
 │   └── mailer.js             # Resend / SMTP email templates
 └── public/                 # Frontend pages: home, request, quote, status, admin
 ```

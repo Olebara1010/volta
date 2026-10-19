@@ -78,9 +78,7 @@ async function createDepositSession(request, { price, acceptCounter = false }) {
   });
 }
 
-const PROJECT_TYPES = ['simple_website', 'ecommerce', 'web_app', 'mobile_app', 'not_sure'];
-const TIMELINES = ['no_rush', 'two_to_four_weeks', 'rush'];
-const FEATURE_FLAGS = ['userAccounts', 'payments', 'adminPanel', 'thirdPartyIntegrations', 'fileUploads', 'search', 'multiLanguage'];
+const { PROJECT_TYPES, TIMELINES, FEATURE_FLAGS } = require('../utils/projectOptions');
 const MAX_BUDGET = 1000000;
 
 // Builds the new request from an explicit list of fields. Copying req.body
