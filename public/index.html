@@ -238,6 +238,53 @@
     #toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50; background: var(--ink); color: var(--paper); padding: 0.9rem 1.2rem; border-radius: 8px; font-size: 0.925rem; max-width: 320px; opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
     #toast.show { opacity: 1; transform: none; }
 
+
+    /* ── Hero showcase: example designs on a laptop and phone ── */
+    .showcase { position: relative; margin: 0; padding-bottom: 2rem; }
+    .laptop-screen { background: #0D0F12; border-radius: 14px 14px 0 0; padding: 9px 9px 0; box-shadow: var(--slip-shadow); }
+    .screen-in { position: relative; overflow: hidden; background: #fff; }
+    .laptop-screen .screen-in { aspect-ratio: 16 / 10; border-radius: 4px 4px 0 0; }
+    .screen-in img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; transition: opacity 350ms ease; }
+    .screen-in img.fade { opacity: 0; }
+    .laptop-base { height: 13px; margin: 0 -6%; border-radius: 0 0 12px 12px; background: linear-gradient(#D3D6DA, #A4A9B0); position: relative; }
+    .laptop-base::before { content: ''; position: absolute; left: 50%; top: 0; width: 16%; height: 5px; transform: translateX(-50%); border-radius: 0 0 6px 6px; background: #8E939A; }
+    .phone { position: absolute; right: -4%; bottom: 0.75rem; width: 29%; aspect-ratio: 9 / 19.5; background: #0D0F12; border-radius: 22px; padding: 5px; box-shadow: 0 24px 40px -18px rgba(0,0,0,0.55); }
+    .phone .screen-in { width: 100%; height: 100%; border-radius: 18px; }
+    .show-cap { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; font-size: 0.9rem; color: var(--slate); }
+    .show-tag { background: var(--slip); border: 1px solid var(--rule); color: var(--ink); border-radius: 100px; padding: 0.15rem 0.65rem; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+    #showName { transition: opacity 350ms ease; }
+    #showName.fade { opacity: 0; }
+    @media (prefers-reduced-motion: no-preference) {
+      .showcase { animation: show-in 700ms cubic-bezier(.2,.7,.2,1) both 150ms; }
+      @keyframes show-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    }
+
+    /* Picture at the top of each "What you can create" card */
+    .kind { padding: 0; overflow: hidden; }
+    .kind-shot { height: 170px; border-bottom: 1px solid var(--rule); background: var(--paper); overflow: hidden; }
+    .kind-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .kind-shot.is-phone { background: #FDE9D8; display: flex; justify-content: center; align-items: flex-end; padding-top: 16px; }
+    .kind-shot.is-phone img { width: 40%; height: auto; border: 5px solid #0D0F12; border-bottom: 0; border-radius: 16px 16px 0 0; }
+    .kind-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+    /* Example designs gallery */
+    .work-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .work { background: var(--slip); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; transition: transform 250ms ease, border-color 250ms ease; }
+    .work:hover { transform: translateY(-4px); border-color: var(--cobalt); }
+    .work.wide { grid-column: span 2; }
+    .work-shot { position: relative; height: 250px; padding: 1.25rem 1.25rem 0; overflow: hidden; }
+    .work-shot .desk { width: 100%; height: 100%; object-fit: cover; object-position: top left; border-radius: 8px 8px 0 0; box-shadow: 0 10px 30px -14px rgba(0,0,0,0.45); display: block; }
+    .work-shot .mob { height: auto; position: absolute; right: 1.25rem; bottom: -40px; width: 24%; max-width: 120px; border: 4px solid #0D0F12; border-radius: 16px; box-shadow: 0 16px 30px -12px rgba(0,0,0,0.5); }
+    .work.wide .work-shot .mob { width: 15%; }
+    .work-shot.is-phone { display: flex; justify-content: center; gap: 1rem; padding-top: 1.5rem; }
+    .work-shot.is-phone img { width: 38%; max-width: 170px; height: auto; align-self: flex-start; border: 5px solid #0D0F12; border-radius: 22px; box-shadow: 0 16px 30px -12px rgba(0,0,0,0.5); }
+    .work-body { padding: 1.1rem 1.25rem 1.3rem; border-top: 1px solid var(--rule); }
+    .work-tag { font-size: 0.78rem; font-weight: 600; color: var(--slate); }
+    .work-tag.live { color: var(--ok); }
+    .work h3 { font-size: 1.2rem; margin: 0.2rem 0 0.3rem; }
+    .work p { color: var(--slate); font-size: 0.925rem; }
+    .work-note { margin-top: 1.25rem; color: var(--slate); font-size: 0.9rem; }
+
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 960px) {
       .steps { grid-template-columns: repeat(2, 1fr); }
@@ -246,7 +293,9 @@
       .nav-links { display: none; }
       .nav .theme-toggle { margin-left: auto; }
       .hero, .block-head, .track, .contact, .foot { grid-template-columns: 1fr; }
-      .slip { max-width: 420px; }
+      .showcase { max-width: 520px; width: 100%; }
+      .work-grid { grid-template-columns: 1fr 1fr; }
+      .work.wide { grid-column: span 2; }
       .facts { grid-template-columns: 1fr; }
       .facts div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
       .foot-links { justify-content: flex-start; }
@@ -254,6 +303,13 @@
     @media (max-width: 520px) {
       .steps { grid-template-columns: 1fr; }
       .kind { width: 260px; }
+      .phone { right: 0; }
+      .showcase { padding: 0 2.5% 2rem; }
+      .laptop-base { margin: 0 -2.5%; }
+      .work-grid { grid-template-columns: 1fr; }
+      .work.wide { grid-column: auto; }
+      .work-shot { height: 210px; }
+      .work.wide .work-shot .mob { width: 24%; }
       .two, .inline-form { grid-template-columns: 1fr; display: grid; }
       .nav .btn { display: none; }
     }
@@ -270,6 +326,7 @@
     <a class="wordmark" href="/" aria-label="Volta Energy home"><svg class="bolt" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg><span>Volta</span></a>
     <ul class="nav-links">
       <li><a href="#build">What we build</a></li>
+      <li><a href="#work">Examples</a></li>
       <li><a href="#how">How it works</a></li>
       <li><a href="#track">Track a project</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -292,24 +349,11 @@
         </div>
       </div>
 
-      <figure class="slip" aria-label="Example project brief" id="slip">
-        <div class="slip-body" id="slipBody">
-          <div class="slip-head">
-            <div>
-              <div class="slip-title" id="exTitle">Bakery online shop</div>
-              <div class="slip-sub">What a client chose</div>
-            </div>
-            <div class="slip-tag">Example</div>
-          </div>
-          <ul class="slip-lines">
-            <li><span>Project type</span><span id="exType">Online store</span></li>
-            <li><span>Features</span><span id="exFeatures">Payments, admin panel, search</span></li>
-            <li><span>Timeline</span><span id="exTime">2–4 weeks</span></li>
-          </ul>
-        </div>
-        <div class="slip-total"><span>Itemised quote</span><strong id="exState">Ready</strong></div>
-        <div class="meter" aria-hidden="true"><div class="meter-fill" id="meterFill"></div></div>
-        <figcaption class="slip-note">Pick what you need, and your quote appears on the next screen.</figcaption>
+      <figure class="showcase" aria-label="Example designs made by Volta">
+        <div class="laptop-screen"><div class="screen-in"><img id="showDesk" src="/img/work/bakery-desktop.webp" width="1200" height="750" alt="Example design: Crumb &amp; Crust bakery online shop on a laptop" fetchpriority="high" /></div></div>
+        <div class="laptop-base" aria-hidden="true"></div>
+        <div class="phone"><div class="screen-in"><img id="showPhone" src="/img/work/bakery-mobile.webp" width="540" height="1169" alt="The same design on a phone" /></div></div>
+        <figcaption class="show-cap"><span class="show-tag">Example design</span><span id="showName">Crumb &amp; Crust · Online store</span></figcaption>
       </figure>
     </div>
 
@@ -332,21 +376,60 @@
     </div>
     <div class="marquee" id="kindsMarquee">
       <ul class="marquee-track">
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M7 21h10"/></svg><h3>Business websites</h3><p>A professional home for your business, with your services, opening hours, contact details and an enquiry form.</p></li>
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-1.5 9h-13z"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="16" cy="19.5" r="1.3"/><path d="M2 3h2l.5 3"/></svg><h3>Online stores</h3><p>Sell products online with a basket, card payments and an easy way to manage orders and stock.</p></li>
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg><h3>Booking and appointment sites</h3><p>Let customers book a table, a class or an appointment, and get reminders sent automatically.</p></li>
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg><h3>Portfolios and personal sites</h3><p>Show your work, your CV or your creative projects with a site that's yours, not a template.</p></li>
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 15v-3M11 15V9M15 15v-5M19 15"/></svg><h3>Web apps</h3><p>Dashboards, client portals, member areas and internal tools, with logins and your own data.</p></li>
-          <li class="kind"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg><h3>Mobile apps</h3><p>Apps for iPhone and Android that your customers or staff use every day.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M7 21h10"/></svg><h3>Business websites</h3><p>A professional home for your business, with your services, opening hours, contact details and an enquiry form.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-1.5 9h-13z"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="16" cy="19.5" r="1.3"/><path d="M2 3h2l.5 3"/></svg><h3>Online stores</h3><p>Sell products online with a basket, card payments and an easy way to manage orders and stock.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg><h3>Booking and appointment sites</h3><p>Let customers book a table, a class or an appointment, and get reminders sent automatically.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg><h3>Portfolios and personal sites</h3><p>Show your work, your CV or your creative projects with a site that's yours, not a template.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 15v-3M11 15V9M15 15v-5M19 15"/></svg><h3>Web apps</h3><p>Dashboards, client portals, member areas and internal tools, with logins and your own data.</p></li>
-          <li class="kind" aria-hidden="true"><svg class="kind-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg><h3>Mobile apps</h3><p>Apps for iPhone and Android that your customers or staff use every day.</p></li>
+          <li class="kind"><div class="kind-shot"><img src="/img/work/cleaning-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Business websites</h3><p>A professional home for your business, with your services, opening hours, contact details and an enquiry form.</p></div></li>
+          <li class="kind"><div class="kind-shot"><img src="/img/work/bakery-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Online stores</h3><p>Sell products online with a basket, card payments and an easy way to manage orders and stock.</p></div></li>
+          <li class="kind"><div class="kind-shot"><img src="/img/work/barber-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Booking and appointment sites</h3><p>Let customers book a table, a class or an appointment, and get reminders sent automatically.</p></div></li>
+          <li class="kind"><div class="kind-shot"><img src="/img/work/portfolio-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Portfolios and personal sites</h3><p>Show your work, your CV or your creative projects with a site that's yours, not a template.</p></div></li>
+          <li class="kind"><div class="kind-shot"><img src="/img/work/webapp-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Web apps</h3><p>Dashboards, client portals, member areas and internal tools, with logins and your own data.</p></div></li>
+          <li class="kind"><div class="kind-shot is-phone"><img src="/img/work/app-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div><div class="kind-body"><h3>Mobile apps</h3><p>Apps for iPhone and Android that your customers or staff use every day.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot"><img src="/img/work/cleaning-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Business websites</h3><p>A professional home for your business, with your services, opening hours, contact details and an enquiry form.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot"><img src="/img/work/bakery-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Online stores</h3><p>Sell products online with a basket, card payments and an easy way to manage orders and stock.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot"><img src="/img/work/barber-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Booking and appointment sites</h3><p>Let customers book a table, a class or an appointment, and get reminders sent automatically.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot"><img src="/img/work/portfolio-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Portfolios and personal sites</h3><p>Show your work, your CV or your creative projects with a site that's yours, not a template.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot"><img src="/img/work/webapp-desktop.webp" width="1200" height="750" alt="" loading="lazy" /></div><div class="kind-body"><h3>Web apps</h3><p>Dashboards, client portals, member areas and internal tools, with logins and your own data.</p></div></li>
+          <li class="kind" aria-hidden="true"><div class="kind-shot is-phone"><img src="/img/work/app-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div><div class="kind-body"><h3>Mobile apps</h3><p>Apps for iPhone and Android that your customers or staff use every day.</p></div></li>
       </ul>
     </div>
     <p class="kinds-foot">Not sure which fits? Choose "Not sure yet" when you start a project and describe what you want in your own words.</p>
+  </section>
+
+  <!-- EXAMPLE DESIGNS -->
+  <section class="block wrap" id="work">
+    <div class="block-head reveal">
+      <h2>Example designs</h2>
+      <p>A few concepts we designed to show what different kinds of business could have. Your project is designed from scratch around your brand and what your customers need.</p>
+    </div>
+    <div class="work-grid">
+      <article class="work wide">
+        <div class="work-shot"><img class="desk" src="/img/work/volta-desktop.webp" width="1200" height="750" alt="Volta's quote page, showing an itemised AI-generated quote" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag live">Built by us · Live now</span><h3>Volta</h3><p>The site you're on: AI-generated quotes, a brief assistant, Stripe payments, live project tracking and secure file delivery.</p></div>
+      </article>
+      <article class="work">
+        <div class="work-shot"><img class="desk" src="/img/work/bakery-desktop.webp" width="1200" height="750" alt="Crumb &amp; Crust bakery online shop" loading="lazy" /><img class="mob" src="/img/work/bakery-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Online store</span><h3>Crumb &amp; Crust</h3><p>A bakery shop with next-morning delivery, a basket and card payments.</p></div>
+      </article>
+      <article class="work">
+        <div class="work-shot"><img class="desk" src="/img/work/barber-desktop.webp" width="1200" height="750" alt="Sharp Line Barbers booking site" loading="lazy" /><img class="mob" src="/img/work/barber-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Booking site</span><h3>Sharp Line Barbers</h3><p>Pick a barber and a time, pay a deposit, and get a text reminder.</p></div>
+      </article>
+      <article class="work">
+        <div class="work-shot"><img class="desk" src="/img/work/cleaning-desktop.webp" width="1200" height="750" alt="Sparkle Clean Co business website" loading="lazy" /><img class="mob" src="/img/work/cleaning-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Business website</span><h3>Sparkle Clean Co</h3><p>A cleaning company site with instant prices by postcode.</p></div>
+      </article>
+      <article class="work">
+        <div class="work-shot"><img class="desk" src="/img/work/portfolio-desktop.webp" width="1200" height="750" alt="Lena Marsh Photography portfolio" loading="lazy" /><img class="mob" src="/img/work/portfolio-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Portfolio</span><h3>Lena Marsh Photography</h3><p>A calm, image-first portfolio for a wedding photographer.</p></div>
+      </article>
+      <article class="work wide">
+        <div class="work-shot"><img class="desk" src="/img/work/webapp-desktop.webp" width="1200" height="750" alt="Ledgerly invoicing dashboard" loading="lazy" /><img class="mob" src="/img/work/webapp-mobile.webp" width="540" height="1169" alt="" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Web app</span><h3>Ledgerly</h3><p>An invoicing dashboard for a trades business, with logins and live figures.</p></div>
+      </article>
+      <article class="work">
+        <div class="work-shot is-phone" style="background:#FDE9D8"><img src="/img/work/app-mobile.webp" width="540" height="1169" alt="Jollof Express food ordering app" loading="lazy" /></div>
+        <div class="work-body"><span class="work-tag">Concept · Mobile app</span><h3>Jollof Express</h3><p>A food ordering app with search, categories and quick reorders.</p></div>
+      </article>
+    </div>
+    <p class="work-note">These are example designs made by Volta to show what's possible. The businesses are made up; they aren't client projects.</p>
   </section>
 
   <!-- HOW IT WORKS -->
@@ -462,35 +545,32 @@
     }, 2600);
   })();
 
-  // Example brief that cycles through different projects
+  // Hero showcase: cycles through the example designs
   (function () {
-    const examples = [
-      { title: 'Bakery online shop', type: 'Online store', features: 'Payments, admin panel, search', time: '2–4 weeks' },
-      { title: 'Hair salon bookings', type: 'Web app', features: 'Online booking, user accounts', time: 'No rush' },
-      { title: 'Gym member app', type: 'Mobile app', features: 'Logins, payments, class timetable', time: 'As soon as possible' },
-      { title: 'Plumber website', type: 'Simple website', features: 'Contact form, service area map', time: '2–4 weeks' },
+    const shows = [
+      ['bakery', 'Crumb & Crust · Online store', 'Crumb & Crust bakery online shop'],
+      ['barber', 'Sharp Line Barbers · Booking site', 'Sharp Line Barbers booking site'],
+      ['cleaning', 'Sparkle Clean Co · Business website', 'Sparkle Clean Co business website'],
+      ['portfolio', 'Lena Marsh · Portfolio', 'Lena Marsh Photography portfolio'],
+      ['webapp', 'Ledgerly · Web app', 'Ledgerly invoicing web app'],
     ];
-    const body = document.getElementById('slipBody');
-    const fill = document.getElementById('meterFill');
-    const state = document.getElementById('exState');
-    if (!body) return;
-    const set = (id, v) => { document.getElementById(id).textContent = v; };
+    const desk = document.getElementById('showDesk');
+    const phone = document.getElementById('showPhone');
+    const name = document.getElementById('showName');
+    if (!desk || reduceMotion) return;
+    shows.forEach(([n]) => { new Image().src = `/img/work/${n}-desktop.webp`; new Image().src = `/img/work/${n}-mobile.webp`; });
     let i = 0;
-    function run() {
-      state.textContent = 'Building...';
-      fill.classList.remove('run'); void fill.offsetWidth; fill.classList.add('run');
-      setTimeout(() => { state.textContent = 'Ready'; }, 1400);
-    }
-    run();
     setInterval(() => {
-      body.classList.add('swap');
+      if (document.hidden) return;
+      [desk, phone, name].forEach(el => el.classList.add('fade'));
       setTimeout(() => {
-        i = (i + 1) % examples.length;
-        const e = examples[i];
-        set('exTitle', e.title); set('exType', e.type); set('exFeatures', e.features); set('exTime', e.time);
-        body.classList.remove('swap');
-        run();
-      }, 300);
+        i = (i + 1) % shows.length;
+        const [n, label, alt] = shows[i];
+        desk.src = `/img/work/${n}-desktop.webp`; desk.alt = `Example design: ${alt} on a laptop`;
+        phone.src = `/img/work/${n}-mobile.webp`;
+        name.textContent = label;
+        [desk, phone, name].forEach(el => el.classList.remove('fade'));
+      }, 350);
     }, 4500);
   })();
 
