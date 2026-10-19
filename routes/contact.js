@@ -2,26 +2,34 @@ const express = require('express');
 const validator = require('validator');
 const db = require('../db/database');
 const { sendContactNotification, sendContactConfirmation } = require('../utils/mailer');
+const { requireAdmin } = require('../middleware/adminAuth');
+const { honeypot, text, ValidationError } = require('../middleware/security');
 
 const router = express.Router();
 
 // ── POST /api/contact ──────────────────────────────────────
-router.post('/', async (req, res) => {
+router.post('/', honeypot({ message: "Message received! We'll be in touch soon." }), async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
-
-    if (!name || !email || !message)
-      return res.status(400).json({ error: 'Name, email, and message are required.' });
+    let name, email, subject, message;
+    try {
+      name = text(req.body.name, 'Name', 100, { required: true });
+      email = text(req.body.email, 'Email', 254, { required: true });
+      subject = text(req.body.subject, 'Subject', 200);
+      message = text(req.body.message, 'Message', 5000, { required: true });
+    } catch (err) {
+      if (err instanceof ValidationError) return res.status(400).json({ error: err.message });
+      throw err;
+    }
     if (!validator.isEmail(email))
       return res.status(400).json({ error: 'Invalid email address.' });
     if (message.length < 10)
       return res.status(400).json({ error: 'Message is too short.' });
 
     await db.createContact({
-      name: name.trim(),
+      name,
       email: email.toLowerCase(),
-      subject: subject?.trim() || null,
-      message: message.trim(),
+      subject: subject || null,
+      message,
     });
 
     Promise.all([
@@ -36,8 +44,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ── GET /api/contact — list all (protected, future admin use) ──
-router.get('/', async (req, res) => {
+// ── GET /api/contact — list all (admin only) ──
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const contacts = await db.getContacts();
     res.json({ contacts });

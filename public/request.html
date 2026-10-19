@@ -77,6 +77,8 @@
 
   @media (max-width: 640px) { .checks { grid-template-columns: 1fr; } .back-link { display: none; } }
   @media (prefers-reduced-motion: reduce) { .btn-primary:hover { transform: none; } }
+  /* Spam trap: hidden from people, bots fill it in */
+  .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -96,6 +98,7 @@
   <p class="lede">The more detail you give us here, the more accurate your quote will be. It takes about three minutes, and your itemised quote appears straight after.</p>
 
   <form id="request-form">
+    <div class="hp-field" aria-hidden="true"><label for="website">Leave this empty</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
 
     <section class="q-block">
       <p class="q">Who are we talking to?</p>
@@ -245,6 +248,7 @@
       designReferences: fd.get('designReferences') || undefined,
       timeline: fd.get('timeline'),
       additionalNotes: fd.get('additionalNotes') || undefined,
+      website: fd.get('website') || undefined,
     };
 
     let redirecting = false;

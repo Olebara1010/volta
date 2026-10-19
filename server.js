@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
+const { securityHeaders } = require('./middleware/security');
 
 const app = express();
 
@@ -15,13 +16,16 @@ mongoose
   .catch(err => { console.error('MongoDB connection error:', err); process.exit(1); });
 
 // ── Middleware ─────────────────────────────────────────────
+app.disable('x-powered-by');
+app.use(securityHeaders);
 app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 
 // Stripe webhook needs the RAW request body to verify its signature, so this
 // route is registered before express.json() runs and is exempt from it.
 app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), require('./routes/stripeWebhook'));
 
-app.use(express.json());
+// Small JSON limit: no form on the site sends anywhere near this much.
+app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Rate limiting — protect all API routes

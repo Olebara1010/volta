@@ -257,6 +257,8 @@
       .two, .inline-form { grid-template-columns: 1fr; display: grid; }
       .nav .btn { display: none; }
     }
+  /* Spam trap: hidden from people, bots fill it in */
+  .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
   </style>
 </head>
 <body>
@@ -401,6 +403,7 @@
         <input class="field" type="text" id="cSubject" placeholder="Subject (optional)" />
         <label class="sr" for="cMessage">Message</label>
         <textarea class="field" id="cMessage" placeholder="What are you working on?"></textarea>
+        <div class="hp-field" aria-hidden="true"><label for="cWebsite">Leave this empty</label><input type="text" id="cWebsite" tabindex="-1" autocomplete="off" /></div>
         <div class="form-status" id="contactStatus" role="alert"></div>
         <button class="btn" type="button" id="contactBtn" onclick="handleContact(this)">Send message</button>
       </div>
@@ -420,6 +423,7 @@
           <div class="inline-form">
             <label class="sr" for="subEmail">Email address</label>
             <input class="field" type="email" id="subEmail" placeholder="Email address" autocomplete="email" />
+            <div class="hp-field" aria-hidden="true"><label for="subWebsite">Leave this empty</label><input type="text" id="subWebsite" tabindex="-1" autocomplete="off" /></div>
             <button class="btn btn-quiet" type="button" onclick="handleSubscribe(this)">Subscribe</button>
           </div>
           <div class="form-status" id="subStatus" role="alert"></div>
@@ -545,11 +549,12 @@
     const email = document.getElementById('cEmail').value.trim();
     const subject = document.getElementById('cSubject').value.trim();
     const message = document.getElementById('cMessage').value.trim();
+    const website = document.getElementById('cWebsite').value;
     const status = document.getElementById('contactStatus');
     if (!name || !email || !message) { showStatus(status, 'Add your name, email and a message.', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Sending...';
     try {
-      const res = await fetch(`${API}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, subject, message }) });
+      const res = await fetch(`${API}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, subject, message, website }) });
       const data = await res.json();
       if (!res.ok) { showStatus(status, data.error || 'Your message wasn\'t sent. Try again.', 'error'); return; }
       showStatus(status, data.message || 'Message sent.', 'success');
@@ -566,11 +571,12 @@
   async function handleSubscribe(btn) {
     const email = document.getElementById('subEmail').value.trim();
     const name = document.getElementById('subName').value.trim();
+    const website = document.getElementById('subWebsite').value;
     const status = document.getElementById('subStatus');
     if (!email) { showStatus(status, 'Enter your email address.', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Subscribing...';
     try {
-      const res = await fetch(`${API}/api/newsletter/subscribe`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, name }) });
+      const res = await fetch(`${API}/api/newsletter/subscribe`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, name, website }) });
       const data = await res.json();
       if (!res.ok) { showStatus(status, data.error || 'You weren\'t subscribed. Try again.', 'error'); return; }
       showStatus(status, data.message || 'Subscribed.', 'success');

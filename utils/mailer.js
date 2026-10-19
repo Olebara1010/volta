@@ -324,19 +324,38 @@ async function sendFinalPaymentNotification({ clientName, clientEmail, projectTi
   });
 }
 
+// ── Escape user-supplied text before it goes into an email's HTML ──
+// Names, briefs and notes come from public forms, so without this someone
+// could put links or markup into the emails sent to you or your clients.
+// Email addresses are left as they are: they've already been validated and
+// they're also used as the "to" address.
+const RAW_FIELDS = new Set(['email', 'clientEmail']);
+const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function escapeFields(value, key) {
+  if (value && value.$__ && typeof value.toObject === 'function') value = value.toObject(); // Mongoose document
+  if (typeof value === 'string') return RAW_FIELDS.has(key) ? value : escapeHtml(value);
+  if (Array.isArray(value)) return value.map(v => escapeFields(v));
+  if (value && Object.getPrototypeOf(value) === Object.prototype) {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, escapeFields(v, k)]));
+  }
+  return value; // numbers, dates, ObjectIds, etc.
+}
+const safe = fn => data => fn(escapeFields(data));
+
 module.exports = {
-  sendContactNotification,
-  sendContactConfirmation,
-  sendNewsletterWelcome,
-  sendSubscriberNotification,
-  sendProjectRequestNotification,
-  sendProjectRequestConfirmation,
-  sendDeliveryNotification,
-  sendDepositConfirmation,
-  sendDepositNotification,
-  sendBudgetProposalNotification,
-  sendBudgetAccepted,
-  sendBudgetCountered,
-  sendFinalPaymentConfirmation,
-  sendFinalPaymentNotification,
+  sendContactNotification: safe(sendContactNotification),
+  sendContactConfirmation: safe(sendContactConfirmation),
+  sendNewsletterWelcome: safe(sendNewsletterWelcome),
+  sendSubscriberNotification: safe(sendSubscriberNotification),
+  sendProjectRequestNotification: safe(sendProjectRequestNotification),
+  sendProjectRequestConfirmation: safe(sendProjectRequestConfirmation),
+  sendDeliveryNotification: safe(sendDeliveryNotification),
+  sendDepositConfirmation: safe(sendDepositConfirmation),
+  sendDepositNotification: safe(sendDepositNotification),
+  sendBudgetProposalNotification: safe(sendBudgetProposalNotification),
+  sendBudgetAccepted: safe(sendBudgetAccepted),
+  sendBudgetCountered: safe(sendBudgetCountered),
+  sendFinalPaymentConfirmation: safe(sendFinalPaymentConfirmation),
+  sendFinalPaymentNotification: safe(sendFinalPaymentNotification),
+  escapeFields,
 };

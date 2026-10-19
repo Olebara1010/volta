@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const db = require('../db/database');
 const { requireAdmin } = require('../middleware/adminAuth');
+const { honeypot, text, oneOf, ValidationError } = require('../middleware/security');
 const {
   sendProjectRequestNotification, sendProjectRequestConfirmation, sendDeliveryNotification,
   sendBudgetProposalNotification, sendBudgetAccepted, sendBudgetCountered,
@@ -77,21 +78,48 @@ async function createDepositSession(request, { price, acceptCounter = false }) {
   });
 }
 
+const PROJECT_TYPES = ['simple_website', 'ecommerce', 'web_app', 'mobile_app', 'not_sure'];
+const TIMELINES = ['no_rush', 'two_to_four_weeks', 'rush'];
+const FEATURE_FLAGS = ['userAccounts', 'payments', 'adminPanel', 'thirdPartyIntegrations', 'fileUploads', 'search', 'multiLanguage'];
+const MAX_BUDGET = 1000000;
+
+// Builds the new request from an explicit list of fields. Copying req.body
+// straight into the database would let someone add fields like
+// "fullPaymentPaid: true" or "quotedPrice: 1" to their own request.
+function buildProjectRequest(body) {
+  const features = body.features && typeof body.features === 'object' ? body.features : {};
+  const data = {
+    clientName: text(body.clientName, 'Name', 100, { required: true }),
+    clientEmail: text(body.clientEmail, 'Email', 254, { required: true }),
+    clientPhone: text(body.clientPhone, 'Phone', 30),
+    projectTitle: text(body.projectTitle, 'Project title', 150, { required: true }),
+    projectType: oneOf(body.projectType, 'project type', PROJECT_TYPES),
+    description: text(body.description, 'Description', 5000, { required: true }),
+    features: { other: text(features.other, 'Other features', 500) },
+    designReferences: text(body.designReferences, 'Design references', 1000),
+    timeline: oneOf(body.timeline, 'timeline', TIMELINES),
+    budgetRange: text(body.budgetRange, 'Budget range', 100),
+    additionalNotes: text(body.additionalNotes, 'Additional notes', 2000),
+  };
+  for (const flag of FEATURE_FLAGS) data.features[flag] = features[flag] === true;
+  if (!validator.isEmail(data.clientEmail)) throw new ValidationError('Please provide a valid email address.');
+  return data;
+}
+
 // POST /api/requests — client submits the form (public, no auth required)
 // Generates the itemised AI quote synchronously, so the client can be sent
 // straight to the quote page with a number already waiting for them.
-router.post('/', async (req, res) => {
+router.post('/', honeypot({ message: "Got it — we'll have your quote ready shortly.", requestId: null, quote: null }), async (req, res) => {
   try {
-    const { clientName, clientEmail, projectTitle, projectType, description, timeline } = req.body;
-
-    if (!clientEmail || !validator.isEmail(clientEmail)) {
-      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    let data;
+    try {
+      data = buildProjectRequest(req.body);
+    } catch (err) {
+      if (err instanceof ValidationError) return res.status(400).json({ error: err.message });
+      throw err;
     }
-    if (!clientName || !projectTitle || !projectType || !description || !timeline) {
-      return res.status(400).json({ error: 'Please fill in all required fields.' });
-    }
 
-    const request = await db.createProjectRequest(req.body);
+    const request = await db.createProjectRequest(data);
 
     // Fire-and-forget — a slow/failed email shouldn't block the client's response
     sendProjectRequestNotification(request).catch(err => console.error('Request notification email failed:', err.message));
@@ -117,7 +145,8 @@ router.post('/', async (req, res) => {
       quote,
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Project request failed:', err.message);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });
 
@@ -136,7 +165,7 @@ router.get('/', requireAdmin, async (req, res) => {
 router.get('/lookup', async (req, res) => {
   try {
     const { email } = req.query;
-    if (!email || !validator.isEmail(email)) {
+    if (typeof email !== 'string' || !validator.isEmail(email)) {
       return res.status(400).json({ error: 'Please provide a valid email address.' });
     }
     const requests = await db.getProjectRequestsByEmail(email);
@@ -163,6 +192,11 @@ router.post('/:id/quote', async (req, res) => {
   try {
     const request = await db.getProjectRequestById(req.params.id);
     if (!request) return res.status(404).json({ error: 'Request not found' });
+    // Only quote once. Otherwise anyone with the link could keep re-rolling the
+    // AI price (and run up API costs), even after a price had been agreed.
+    if (request.quotedPrice && !request.quoteFailed) {
+      return res.status(409).json({ error: 'This project already has a quote.' });
+    }
 
     const quote = await generateQuote(request);
     const updated = await db.saveQuote(req.params.id, {
@@ -200,7 +234,7 @@ router.post('/:id/propose-budget', async (req, res) => {
   try {
     const { budget } = req.body;
     const amount = Number(budget);
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_BUDGET) {
       return res.status(400).json({ error: 'Please enter a valid budget amount.' });
     }
     const request = await db.getProjectRequestById(req.params.id);

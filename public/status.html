@@ -223,6 +223,10 @@
 
 <script>
   const API = '';
+  // Escape text from the database before putting it into HTML, so a malicious
+  // name or brief can't inject script into the page.
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   const params = new URLSearchParams(window.location.search);
   const requestId = params.get('id');
 
@@ -316,10 +320,10 @@
         fileList.innerHTML = request.deliveredFiles.map(f => `
           <div class="file-row">
             <div>
-              <div class="file-name">${f.originalName}</div>
+              <div class="file-name">${esc(f.originalName)}</div>
               <div class="file-size">${formatFileSize(f.size)}</div>
             </div>
-            <a class="btn-download" href="${API}/api/requests/${requestId}/files/${f.filename}">Download</a>
+            <a class="btn-download" href="${API}/api/requests/${requestId}/files/${encodeURIComponent(f.filename)}">Download</a>
           </div>
         `).join('');
       }
@@ -449,10 +453,10 @@
       resultList.innerHTML = requests.map(r => `
         <a class="result-card" href="status.html?id=${r._id}">
           <div>
-            <div class="result-title">${r.projectTitle}</div>
+            <div class="result-title">${esc(r.projectTitle)}</div>
             <div class="result-date">${new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
           </div>
-          <span class="status-pill pill-${r.status}">${r.status.replace('_', ' ')}</span>
+          <span class="status-pill pill-${esc(r.status)}">${esc(r.status.replace('_', ' '))}</span>
         </a>
       `).join('');
       resultList.classList.remove('hidden');

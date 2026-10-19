@@ -219,6 +219,10 @@
 
 <script>
   const API = '';
+  // Escape text from the database before putting it into HTML, so a malicious
+  // name or brief can't inject script into the page.
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   const params = new URLSearchParams(window.location.search);
   const requestId = params.get('id');
 
@@ -267,7 +271,7 @@
     const container = document.getElementById('lineItems');
     container.innerHTML = lineItems.map(item => `
       <div class="line-item">
-        <span>${item.label}</span>
+        <span>${esc(item.label)}</span>
         <span class="amount">£${Number(item.amount).toLocaleString('en-GB')}</span>
       </div>
     `).join('');

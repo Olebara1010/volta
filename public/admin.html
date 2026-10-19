@@ -118,6 +118,10 @@
 
 <script>
   const API = '';
+  // Escape text from the database before putting it into HTML, so a malicious
+  // name or brief can't inject script into the page.
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   let adminToken = localStorage.getItem('volta_admin_token');
 
   const loginGate = document.getElementById('loginGate');
@@ -240,30 +244,30 @@
       <div class="project-card">
         <div class="project-head" onclick="toggleDetail('${p._id}')">
           <div>
-            <div class="project-title">${p.projectTitle}</div>
-            <div class="project-meta">${p.clientName} · ${p.clientEmail} · ${TYPE_LABELS[p.projectType] || p.projectType} · ${new Date(p.created_at).toLocaleDateString('en-GB')}</div>
+            <div class="project-title">${esc(p.projectTitle)}</div>
+            <div class="project-meta">${esc(p.clientName)} · ${esc(p.clientEmail)} · ${TYPE_LABELS[p.projectType] || esc(p.projectType)} · ${new Date(p.created_at).toLocaleDateString('en-GB')}</div>
           </div>
           <span style="display:flex; align-items:center; gap:0.5rem;">
             ${p.negotiationStatus === 'pending' ? '<span class="status-pill" style="background:rgba(255,77,90,0.18); color:#FF4D5A;">budget proposed</span>' : ''}
             ${p.depositPaid ? '<span class="status-pill" style="background:rgba(198,255,0,0.15); color:#8fb800;">deposit paid</span>' : ''}
             ${p.fullPaymentPaid ? '<span class="status-pill" style="background:rgba(198,255,0,0.15); color:#8fb800;">paid in full</span>' : ''}
-            <span class="status-pill pill-${p.status}">${p.status.replace('_', ' ')}</span>
+            <span class="status-pill pill-${esc(p.status)}">${esc(p.status.replace('_', ' '))}</span>
           </span>
         </div>
         <div class="project-detail" id="detail-${p._id}">
-          <div class="detail-row"><strong>Brief:</strong> ${p.description}</div>
+          <div class="detail-row"><strong>Brief:</strong> ${esc(p.description)}</div>
           ${p.quotedPrice ? `<div class="detail-row"><strong>Quoted:</strong> £${p.quotedPrice.toLocaleString('en-GB')}</div>` : ''}
           ${p.quoteBreakdown && p.quoteBreakdown.length ? `
             <div class="detail-row"><strong>AI quote breakdown:</strong>
               <ul style="margin:0.4rem 0 0 1.1rem;">
-                ${p.quoteBreakdown.map(item => `<li>${item.label}: £${Number(item.amount).toLocaleString('en-GB')}</li>`).join('')}
+                ${p.quoteBreakdown.map(item => `<li>${esc(item.label)}: £${Number(item.amount).toLocaleString('en-GB')}</li>`).join('')}
               </ul>
             </div>` : ''}
-          ${p.quoteNotes ? `<div class="detail-row"><strong>AI explanation:</strong> ${p.quoteNotes}</div>` : ''}
+          ${p.quoteNotes ? `<div class="detail-row"><strong>AI explanation:</strong> ${esc(p.quoteNotes)}</div>` : ''}
           ${p.depositPaid ? `<div class="detail-row"><strong>Deposit:</strong> £${Number(p.depositAmount).toLocaleString('en-GB')} paid ${p.paidAt ? 'on ' + new Date(p.paidAt).toLocaleDateString('en-GB') : ''}</div>` : ''}
           ${p.fullPaymentPaid ? `<div class="detail-row"><strong>Final payment:</strong> £${Number(p.fullPaymentAmount).toLocaleString('en-GB')} paid ${p.fullPaidAt ? 'on ' + new Date(p.fullPaidAt).toLocaleDateString('en-GB') : ''}</div>` : ''}
-          <div class="detail-row"><strong>Timeline:</strong> ${p.timeline.replace(/_/g, ' ')}</div>
-          ${p.budgetRange ? `<div class="detail-row"><strong>Budget stated:</strong> ${p.budgetRange}</div>` : ''}
+          <div class="detail-row"><strong>Timeline:</strong> ${esc(p.timeline.replace(/_/g, ' '))}</div>
+          ${p.budgetRange ? `<div class="detail-row"><strong>Budget stated:</strong> ${esc(p.budgetRange)}</div>` : ''}
           <div class="detail-row"><strong>Request ID:</strong> <code>${p._id}</code></div>
 
           ${p.negotiationStatus === 'pending' ? `
