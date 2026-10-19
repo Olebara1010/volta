@@ -62,7 +62,7 @@ const projectRequestSchema = new mongoose.Schema({
   quoteBreakdown:   { type: [{ label: String, amount: Number }], default: [] },
   quoteNotes:       { type: String, default: null },
   quoteFailed:      { type: Boolean, default: false },
-  deliveredFiles:   { type: [{ filename: String, originalName: String, size: Number, mimetype: String, uploadedAt: Date }], default: [] },
+  deliveredFiles:   { type: [{ filename: String, originalName: String, size: Number, mimetype: String, storage: { type: String, default: 'disk' }, uploadedAt: Date }], default: [] }, // storage: 'r2' | 'disk'
   depositPaid:      { type: Boolean, default: false },
   depositAmount:    { type: Number, default: null }, // amount actually charged, in GBP
   stripeSessionId:  { type: String, default: null },

@@ -27,7 +27,7 @@ I designed, built and deployed it end to end.
 - **AI integration with guardrails:** quotes come from the Claude API as structured JSON. The server re-totals every line item and enforces the admin-configured minimum prices and rush multiplier, so the AI can never quote below the floor and the breakdown always matches the total.
 - **AI brief assistant:** a short chat for clients who don't know the technical words. Claude asks up to three questions, one at a time, then returns a structured brief that fills in the request form. The server validates the conversation, keeps only known fields and options from the model's output, and rate-limits the chat with a daily cap on AI calls.
 - **Stripe Checkout and verified webhooks:** deposits and balance payments run through Stripe Checkout. The webhook route uses a raw-body parser registered *before* the JSON middleware, so Stripe's signature verification works, and payment status updates automatically.
-- **Payment-gated downloads:** delivered files can only be downloaded once the project is paid in full, and this is enforced on the server.
+- **Payment-gated downloads from cloud storage:** delivered files are stored in Cloudflare R2 (S3-compatible), so they survive redeploys. A client can only download once the project is paid in full; the server then redirects to a signed link that expires after five minutes.
 - **Transactional email that works in production:** the hosting platform blocks outbound SMTP, so email goes through the Resend HTTPS API from a verified custom domain, with an SMTP fallback for local development.
 - **Admin dashboard:** JWT-secured. It manages pricing settings, accept/counter decisions, status updates, file delivery and resending payment emails.
 - **Security hardening:** security headers and a Content Security Policy (helmet), field whitelisting on every form, a honeypot spam trap, HTML escaping of user text in pages and emails, and rate-limited API routes.
@@ -47,6 +47,7 @@ I designed, built and deployed it end to end.
 | Email | Resend API (Nodemailer for local SMTP) |
 | Auth | JWT, bcrypt |
 | Frontend | HTML, CSS, JavaScript (light/dark theme) |
+| File storage | Cloudflare R2 (AWS S3 SDK) |
 | Hosting | Railway, with Cloudflare for DNS and email routing |
 | Testing / CI | Jest, Supertest, GitHub Actions |
 
@@ -68,6 +69,7 @@ volta/
 │   ├── pricingCalculator.js  # Claude API quote generation and price-floor enforcement
 │   ├── briefAssistant.js     # AI brief assistant chat
 │   ├── claude.js             # Shared Claude API client
+│   ├── storage.js            # Cloudflare R2 / local disk file storage
 │   └── mailer.js             # Resend / SMTP email templates
 └── public/                 # Frontend pages: home, request, quote, status, admin
 ```

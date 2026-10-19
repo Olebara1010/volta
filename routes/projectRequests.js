@@ -16,14 +16,15 @@ const {
   sendFinalPaymentConfirmation, sendFinalPaymentNotification,
 } = require('../utils/mailer');
 const { generateQuote } = require('../utils/pricingCalculator');
+const storage = require('../utils/storage');
 
 // ── File delivery storage ───────────────────────────────────
-// Files land in /uploads/deliveries/<requestId>/ on the server's own disk.
-// Fine for now — if you later deploy somewhere whose filesystem resets on
-// redeploy (e.g. Railway), this is the first thing to swap for cloud storage.
+// Uploads land in /uploads/deliveries/<requestId>/ first. When Cloudflare R2 is
+// set up (see utils/storage.js) they're then moved to R2, which keeps them safe
+// across redeploys; otherwise they stay on the local disk.
 const deliveryStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'uploads', 'deliveries', req.params.id);
+    const dir = path.join(storage.LOCAL_ROOT, req.params.id);
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
@@ -468,13 +469,17 @@ router.post('/:id/deliver', requireAdmin, upload.array('files', 20), async (req,
       return res.status(400).json({ error: 'No files were uploaded.' });
     }
 
-    const fileRecords = req.files.map(f => ({
-      filename: f.filename,
-      originalName: f.originalname,
-      size: f.size,
-      mimetype: f.mimetype,
-      uploadedAt: new Date(),
-    }));
+    const fileRecords = [];
+    for (const f of req.files) {
+      fileRecords.push({
+        filename: f.filename,
+        originalName: f.originalname,
+        size: f.size,
+        mimetype: f.mimetype,
+        storage: await storage.saveDeliveredFile(req.params.id, f),
+        uploadedAt: new Date(),
+      });
+    }
 
     const updated = await db.saveDeliveredFiles(req.params.id, fileRecords);
 
@@ -500,7 +505,14 @@ router.get('/:id/files/:filename', async (req, res) => {
     const fileRecord = (request.deliveredFiles || []).find(f => f.filename === req.params.filename);
     if (!fileRecord) return res.status(404).json({ error: 'File not found' });
 
-    const filePath = path.join(__dirname, '..', 'uploads', 'deliveries', req.params.id, fileRecord.filename);
+    if (fileRecord.storage === 'r2') {
+      return res.redirect(await storage.getDownloadUrl(req.params.id, fileRecord));
+    }
+
+    const filePath = storage.localPath(req.params.id, fileRecord.filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(410).json({ error: 'This file is no longer on the server. Please contact us and we will send it again.' });
+    }
     res.download(filePath, fileRecord.originalName);
   } catch (err) {
     res.status(500).json({ error: err.message });
