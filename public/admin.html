@@ -3,91 +3,79 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin — VOLTA</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<title>Admin – Volta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/volta.css" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --ink: #0A0A0F; --cream: #F7F4EE; --volt: #C6FF00;
-    --coral: #FF4D5A; --cobalt: #2B3FFF; --purple: #9B5DE5; --mid: #5A5A72;
-  }
-  body { font-family: 'Space Grotesk', sans-serif; background: var(--ink); color: var(--cream); min-height: 100vh; }
+  .btn-secondary { padding: 0.65rem 1rem; font-size: 0.9rem; }
 
-  /* ── LOGIN GATE ── */
-  #loginGate { max-width: 380px; margin: 0 auto; padding: 6rem 1.5rem; }
-  #loginGate h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem; margin-bottom: 0.5rem; }
-  #loginGate p { color: rgba(247,244,238,0.55); font-size: 0.9rem; margin-bottom: 2rem; }
+  /* ── Sign in ── */
+  #loginGate { max-width: 400px; margin: 0 auto; padding: clamp(3rem, 8vw, 6rem) clamp(16px, 4vw, 40px); }
+  #loginGate h1 { font-size: 2.2rem; margin-bottom: 0.4rem; }
+  #loginGate p { color: var(--slate); margin-bottom: 1.5rem; }
+  #loginGate .field { margin-bottom: 0.9rem; }
+  #loginGate .btn-primary { width: 100%; }
 
-  .field {
-    width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 0.75rem; padding: 0.85rem 1.1rem; color: var(--cream);
-    font-family: inherit; font-size: 0.95rem; outline: none; margin-bottom: 1.25rem;
-  }
-  .field:focus { border-color: var(--volt); }
+  .status-msg { margin-top: 0.9rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .status-msg.success { background: var(--tint-ok); border: 1px solid var(--ok); color: var(--ok); display: block; }
+  .status-msg.error { background: var(--tint-error); border: 1px solid var(--error); color: var(--error); display: block; }
 
-  .btn-primary {
-    background: var(--volt); color: var(--ink); padding: 0.9rem 1.8rem; border-radius: 100px;
-    font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; width: 100%;
-    font-family: inherit;
-  }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-secondary {
-    background: rgba(255,255,255,0.07); color: var(--cream); padding: 0.6rem 1.2rem; border-radius: 100px;
-    font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.14); cursor: pointer;
-    font-family: inherit;
-  }
+  /* ── Dashboard ── */
+  #dashboard { max-width: 960px; margin: 0 auto; padding: clamp(2rem, 5vw, 3rem) clamp(16px, 4vw, 40px) 5rem; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .top-bar h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 0; }
+  .top-actions { display: flex; gap: 0.5rem; }
 
-  .status-msg { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 0.7rem; font-size: 0.88rem; display: none; }
-  .status-msg.success { background: rgba(198,255,0,0.1); border: 1px solid rgba(198,255,0,0.3); color: var(--volt); display: block; }
-  .status-msg.error { background: rgba(255,77,90,0.08); border: 1px solid rgba(255,77,90,0.3); color: var(--coral); display: block; }
+  .panel { padding: 1.5rem; margin-bottom: 1.25rem; }
+  .panel-title { font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em; margin-bottom: 1rem; }
 
-  /* ── DASHBOARD ── */
-  #dashboard { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
-  .top-bar h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; }
+  .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.9rem; margin-bottom: 1.25rem; }
+  .settings-field label { display: block; font-size: 0.85rem; color: var(--slate); margin-bottom: 0.3rem; }
+  .settings-field input { width: 100%; background: var(--slip); border: 1px solid var(--rule); border-radius: 8px; padding: 0.6rem 0.8rem; color: var(--ink); font: 500 0.95rem var(--body); font-variant-numeric: tabular-nums; }
+  .settings-field input:focus { outline: none; border-color: var(--cobalt); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 25%, transparent); }
 
-  .panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.25rem; padding: 1.75rem; margin-bottom: 1.5rem; }
-  .panel-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.25rem; }
+  .project-card { border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); margin-bottom: 0.75rem; }
+  .project-card:has(.project-detail.open) { border-color: var(--cobalt); }
+  .project-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; cursor: pointer; padding: 1rem 1.15rem; }
+  .project-head > span { flex-wrap: wrap; justify-content: flex-end; }
+  .project-title { font-weight: 600; font-size: 1.02rem; }
+  .project-meta { font-size: 0.85rem; color: var(--slate); overflow-wrap: anywhere; }
+  .pill-flag { background: var(--tint-error); color: var(--error); }
+  .pill-paid { background: var(--tint-ok); color: var(--ok); }
 
-  .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
-  .settings-field label { display: block; font-size: 0.78rem; color: rgba(247,244,238,0.5); margin-bottom: 0.4rem; }
-  .settings-field input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); border-radius: 0.6rem; padding: 0.6rem 0.8rem; color: var(--cream); font-family: inherit; font-size: 0.9rem; }
-
-  .project-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-  .project-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; cursor: pointer; }
-  .project-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
-  .project-meta { font-size: 0.8rem; color: rgba(247,244,238,0.45); }
-
-  .status-pill { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 0.3rem 0.75rem; border-radius: 100px; white-space: nowrap; }
-  .pill-new { background: rgba(255,255,255,0.1); color: rgba(247,244,238,0.6); }
-  .pill-quoted { background: rgba(43,63,255,0.15); color: var(--cobalt); }
-  .pill-accepted { background: rgba(198,255,0,0.15); color: var(--volt); }
-  .pill-in_progress { background: rgba(155,93,229,0.18); color: var(--purple); }
-  .pill-delivered { background: rgba(198,255,0,0.22); color: var(--volt); }
-  .pill-rejected { background: rgba(255,77,90,0.15); color: var(--coral); }
-
-  .project-detail { display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed rgba(255,255,255,0.12); }
+  .project-detail { display: none; padding: 1rem 1.15rem 1.15rem; border-top: 1px solid var(--rule); background: var(--slip); border-radius: 0 0 12px 12px; }
   .project-detail.open { display: block; }
-  .detail-row { font-size: 0.88rem; margin-bottom: 0.6rem; color: rgba(247,244,238,0.75); }
-  .detail-row strong { color: var(--cream); }
+  .detail-row { font-size: 0.95rem; margin-bottom: 0.5rem; overflow-wrap: anywhere; }
+  .detail-row strong { font-weight: 600; }
+  .detail-row ul { margin: 0.35rem 0 0 1.1rem; }
+  .detail-row code { font-size: 0.85rem; background: var(--paper); padding: 0.1rem 0.35rem; border-radius: 4px; }
 
-  .control-row { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
-  select.field, input[type="file"].field { margin-bottom: 0; padding: 0.6rem 0.9rem; font-size: 0.85rem; width: auto; flex: 1; min-width: 160px; }
-  .control-row .btn-secondary { flex-shrink: 0; }
+  .control-row { display: flex; gap: 0.6rem; margin-top: 0.9rem; flex-wrap: wrap; align-items: center; }
+  .control-row .field, .negotiation-row .field { width: auto; flex: 1; min-width: 160px; padding: 0.6rem 0.8rem; font-size: 0.95rem; }
+  .control-row span { color: var(--slate); }
 
-  .empty-state { text-align: center; padding: 3rem 1rem; color: rgba(247,244,238,0.4); font-size: 0.9rem; }
-  .hidden { display: none; }
+  .negotiation-box { background: var(--tint-spark); border: 1px solid color-mix(in srgb, var(--spark) 55%, var(--rule)); border-radius: 10px; padding: 0.9rem 1rem; margin-top: 0.9rem; }
+  .negotiation-row { display: flex; gap: 0.6rem; margin-top: 0.7rem; flex-wrap: wrap; align-items: center; }
 
-  .negotiation-box { background: rgba(198,255,0,0.06); border: 1px solid rgba(198,255,0,0.25); border-radius: 0.9rem; padding: 1rem 1.1rem; margin-top: 1rem; }
-  .negotiation-box strong { color: var(--volt); }
-  .negotiation-row { display: flex; gap: 0.6rem; margin-top: 0.75rem; flex-wrap: wrap; align-items: center; }
-  .negotiation-row input { width: auto; flex: 1; min-width: 120px; }
+  .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--slate); }
 </style>
 </head>
 <body>
 
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="/" aria-label="Volta home"><svg class="bolt" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg><span>Volta</span><small>Admin</small></a>
+    <div class="nav-right">
+      
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Switch light or dark mode"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+    </div>
+  </nav>
+</header>
+
 <div id="loginGate">
-  <h1>Admin ⚡</h1>
+  <h1>Sign in</h1>
   <p>Enter your admin password to continue.</p>
   <input class="field" type="password" id="adminPassword" placeholder="Password" />
   <button class="btn-primary" id="loginBtn">Sign in</button>
@@ -96,22 +84,22 @@
 
 <div id="dashboard" class="hidden">
   <div class="top-bar">
-    <h1>VOLTA Admin</h1>
-    <div style="display:flex; gap:0.6rem;">
-      <button class="btn-secondary" id="refreshBtn">↻ Refresh</button>
+    <h1>Projects and pricing</h1>
+    <div class="top-actions">
+      <button class="btn-secondary" id="refreshBtn">Refresh</button>
       <button class="btn-secondary" onclick="logout()">Log out</button>
     </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">✦ Pricing minimums</div>
+  <div class="panel card">
+    <div class="panel-title">Pricing minimums</div>
     <div class="settings-grid" id="settingsGrid"></div>
     <button class="btn-secondary" id="saveSettingsBtn">Save pricing</button>
     <div class="status-msg" id="settingsMsg"></div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">✦ Projects</div>
+  <div class="panel card">
+    <div class="panel-title">Projects</div>
     <div id="projectList"></div>
   </div>
 </div>
@@ -248,9 +236,9 @@
             <div class="project-meta">${esc(p.clientName)} · ${esc(p.clientEmail)} · ${TYPE_LABELS[p.projectType] || esc(p.projectType)} · ${new Date(p.created_at).toLocaleDateString('en-GB')}</div>
           </div>
           <span style="display:flex; align-items:center; gap:0.5rem;">
-            ${p.negotiationStatus === 'pending' ? '<span class="status-pill" style="background:rgba(255,77,90,0.18); color:#FF4D5A;">budget proposed</span>' : ''}
-            ${p.depositPaid ? '<span class="status-pill" style="background:rgba(198,255,0,0.15); color:#8fb800;">deposit paid</span>' : ''}
-            ${p.fullPaymentPaid ? '<span class="status-pill" style="background:rgba(198,255,0,0.15); color:#8fb800;">paid in full</span>' : ''}
+            ${p.negotiationStatus === 'pending' ? '<span class="status-pill pill-flag">budget proposed</span>' : ''}
+            ${p.depositPaid ? '<span class="status-pill pill-paid">deposit paid</span>' : ''}
+            ${p.fullPaymentPaid ? '<span class="status-pill pill-paid">paid in full</span>' : ''}
             <span class="status-pill pill-${esc(p.status)}">${esc(p.status.replace('_', ' '))}</span>
           </span>
         </div>
@@ -259,7 +247,7 @@
           ${p.quotedPrice ? `<div class="detail-row"><strong>Quoted:</strong> £${p.quotedPrice.toLocaleString('en-GB')}</div>` : ''}
           ${p.quoteBreakdown && p.quoteBreakdown.length ? `
             <div class="detail-row"><strong>AI quote breakdown:</strong>
-              <ul style="margin:0.4rem 0 0 1.1rem;">
+              <ul>
                 ${p.quoteBreakdown.map(item => `<li>${esc(item.label)}: £${Number(item.amount).toLocaleString('en-GB')}</li>`).join('')}
               </ul>
             </div>` : ''}
@@ -288,7 +276,7 @@
           ${!p.depositPaid && (p.negotiationStatus === 'countered' || p.status === 'accepted') ? `
             <div class="control-row">
               <button class="btn-secondary" onclick="resendPaymentEmail('${p._id}')">Resend payment email</button>
-              <span style="font-size:0.8rem; opacity:0.6;">Client's pay link: <code>/api/requests/${p._id}/pay</code></span>
+              <span style="font-size:0.85rem;">Client's pay link: <code>/api/requests/${p._id}/pay</code></span>
             </div>
           ` : ''}
 
@@ -424,6 +412,17 @@
   }
 
   document.getElementById('refreshBtn').addEventListener('click', loadProjects);
+  // ── Theme (same setting as the homepage) ─────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('volta_theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('volta_theme'); } catch (e) {}
+  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 </script>
 </body>
 </html>

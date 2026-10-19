@@ -1,0 +1,79 @@
+/* volta.css: shared look for the quote, status and admin pages.
+   Same tokens, header, type and buttons as the homepage and request page. */
+:root {
+  --paper: #F2F3EF; --ink: #15181C; --slate: #5B6370; --rule: #D5D8D1;
+  --cobalt: #2438C9; --cobalt-ink: #FFFFFF; --spark: #F2B705; --slip: #FFFFFF;
+  --error: #B42318; --ok: #1E7A46;
+  --tint-cobalt: color-mix(in srgb, var(--cobalt) 9%, var(--slip));
+  --tint-ok: color-mix(in srgb, var(--ok) 10%, var(--slip));
+  --tint-error: color-mix(in srgb, var(--error) 8%, var(--slip));
+  --tint-spark: color-mix(in srgb, var(--spark) 16%, var(--slip));
+  --display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  /* Names older page scripts still use in inline styles */
+  --accent-text: var(--cobalt); --coral: var(--error);
+}
+html[data-theme="dark"] {
+  --paper: #121417; --ink: #ECEDE8; --slate: #9AA1AC; --rule: #2A2E33;
+  --cobalt: #8794FF; --cobalt-ink: #121417; --spark: #FFC93C; --slip: #1B1E22;
+  --error: #FF8A80; --ok: #6FD39A;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 3px; border-radius: 4px; }
+a { color: var(--cobalt); }
+.hidden { display: none !important; }
+
+/* ── Header ── */
+header.site { border-bottom: 1px solid var(--rule); background: var(--paper); position: sticky; top: 0; z-index: 10; }
+.nav { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 72px; display: flex; align-items: center; gap: 1rem; }
+.wordmark { display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.03em; text-decoration: none; color: var(--ink); }
+.wordmark small { font-family: var(--body); font-weight: 500; font-size: 0.85rem; letter-spacing: 0; color: var(--slate); margin-left: 0.35rem; }
+.bolt { width: 1.55rem; height: 1.55rem; fill: var(--spark); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+.back-link { color: var(--slate); text-decoration: none; font-size: 0.95rem; }
+.back-link:hover { color: var(--ink); }
+.theme-toggle { display: inline-grid; place-items: center; background: none; border: 1px solid var(--rule); color: var(--ink); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+
+/* ── Page ── */
+.wrap { max-width: 720px; margin: 0 auto; padding: clamp(3rem, 7vw, 5rem) clamp(16px, 4vw, 40px) 6rem; }
+.eyebrow { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cobalt); margin-bottom: 0.6rem; display: inline-flex; align-items: center; gap: 0.35rem; }
+.eyebrow svg { width: 0.9rem; height: 0.9rem; fill: var(--spark); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.03em; max-width: 18ch; margin-bottom: 1rem; }
+.lede { color: var(--slate); font-size: 1.075rem; max-width: 48ch; margin-bottom: 2.5rem; }
+
+/* ── Cards ── */
+.card { background: var(--slip); border: 1px solid var(--rule); border-radius: 14px; }
+
+/* ── Fields ── */
+.field { width: 100%; background: var(--slip); border: 1px solid var(--rule); border-radius: 8px; padding: 0.85rem 1rem; color: var(--ink); font: 400 1rem/1.4 var(--body); }
+.field:focus { outline: none; border-color: var(--cobalt); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 25%, transparent); }
+.field::placeholder { color: var(--slate); opacity: 0.8; }
+
+/* ── Buttons ── */
+.btn-primary, .btn-primary-sm, .btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  border-radius: 8px; font: 600 1rem/1 var(--body); cursor: pointer; text-decoration: none;
+  padding: 0.95rem 1.4rem; transition: transform 150ms, filter 150ms, background 150ms, color 150ms; white-space: nowrap;
+}
+.btn-primary, .btn-primary-sm { background: var(--cobalt); color: var(--cobalt-ink); border: 0; }
+.btn-primary:hover, .btn-primary-sm:hover { filter: brightness(1.08); transform: translateY(-2px); }
+.btn-primary-sm { padding: 0.75rem 1.15rem; font-size: 0.95rem; }
+.btn-secondary { background: none; color: var(--ink); border: 1px solid var(--ink); }
+.btn-secondary:hover { background: var(--ink); color: var(--paper); }
+.btn-primary:disabled, .btn-primary-sm:disabled, .btn-secondary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; filter: none; }
+
+/* ── Status pills ── */
+.status-pill { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; padding: 0.25rem 0.7rem; border-radius: 100px; white-space: nowrap; border: 1px solid transparent; text-transform: capitalize; }
+.pill-new { background: var(--paper); color: var(--slate); border-color: var(--rule); }
+.pill-quoted { background: var(--tint-cobalt); color: var(--cobalt); }
+.pill-accepted, .pill-in_progress { background: var(--tint-spark); color: var(--ink); }
+.pill-delivered { background: var(--tint-ok); color: var(--ok); }
+.pill-rejected { background: var(--tint-error); color: var(--error); }
+
+/* ── Loading spinner ── */
+.spinner { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--rule); border-top-color: var(--cobalt); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) { .back-link { display: none; } }
+@media (prefers-reduced-motion: reduce) { .btn-primary:hover, .btn-primary-sm:hover { transform: none; } .spinner { animation-duration: 2.5s; } }
