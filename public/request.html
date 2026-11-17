@@ -109,7 +109,9 @@
   .btn-send { background: var(--cobalt); color: var(--cobalt-ink); border: 0; border-radius: 8px; padding: 0.85rem 1.1rem; font: 600 0.95rem/1 var(--body); cursor: pointer; }
   .btn-send:disabled { opacity: 0.55; cursor: not-allowed; }
   .chat-foot { color: var(--slate); font-size: 0.8rem; padding: 0 1.5rem 1.1rem; }
-  .chat.hidden, .chat-input.hidden { display: none; }
+  .assist-link { margin-top: 0.75rem; }
+  .assist-link button { background: none; border: 0; padding: 0; color: var(--cobalt); font: inherit; text-decoration: underline; cursor: pointer; }
+  .chat.hidden, .chat-input.hidden, .assistant.hidden { display: none; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .filled { animation: filled 2.4s ease-out; }
   @keyframes filled { 0%, 30% { border-color: var(--cobalt); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 25%, transparent); } }
@@ -134,7 +136,7 @@
   <h1>Tell us what you're building.</h1>
   <p class="lede">The more detail you give us here, the more accurate your quote will be. It takes about three minutes, and your itemised quote appears straight after.</p>
 
-  <section class="assistant" id="assistant" aria-labelledby="assistantTitle">
+  <section class="assistant hidden" id="assistant" aria-labelledby="assistantTitle">
     <div class="assistant-intro">
       <div>
         <p class="kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg>AI brief assistant</p>
@@ -208,6 +210,7 @@
       <div class="field-group">
         <textarea class="field" id="description" name="description" placeholder="e.g. A booking site for my cafe where customers can reserve tables and see the menu..." required></textarea>
       </div>
+      <p class="assist-link"><button type="button" id="assistantOpen">Not sure what to write? Help me describe it</button></p>
     </section>
 
     <section class="q-block">
@@ -390,6 +393,20 @@
     chatText.focus();
   }
   startBtn.addEventListener('click', startChat);
+
+  // The assistant is hidden by default. It opens when the visitor picks
+  // "Not sure yet", or from the link under the description box.
+  const assistant = document.getElementById('assistant');
+  const assistantOpen = document.getElementById('assistantOpen');
+  function revealAssistant() { assistant.classList.remove('hidden'); }
+  assistantOpen.addEventListener('click', () => {
+    revealAssistant();
+    if (chat.classList.contains('hidden')) startChat();
+    assistant.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  form.querySelectorAll('input[name="projectType"]').forEach(radio => {
+    radio.addEventListener('change', () => { if (radio.value === 'not_sure' && radio.checked) revealAssistant(); });
+  });
 
   chatText.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
